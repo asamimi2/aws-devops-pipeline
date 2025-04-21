@@ -1,31 +1,31 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Root stack to deploy complete CI/CD pipeline and serverless application
+Description: Root stack to deploy complete CI/CD pipeline and serverless application using nested local templates
 
 Resources:
 
   S3Stack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3.amazonaws.com/devops-pipeline-templates/templates/s3.yaml
+      TemplateURL: templates/s3.yaml
 
   SQSStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3.amazonaws.com/devops-pipeline-templates/templates/sqs.yaml
+      TemplateURL: templates/sqs.yaml
 
   LambdaStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3.amazonaws.com/devops-pipeline-templates/templates/lambda.yaml
+      TemplateURL: templates/lambda.yaml
       Parameters:
         ArtifactBucketName: !ImportValue ArtifactBucketName
 
   MonitoringStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3.amazonaws.com/devops-pipeline-templates/templates/monitoring.yaml
+      TemplateURL: templates/monitoring.yaml
 
   EventBridgeStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3.amazonaws.com/devops-pipeline-templates/templates/eventbridge.yaml
+      TemplateURL: templates/eventbridge.yaml

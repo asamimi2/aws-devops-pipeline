@@ -1,0 +1,36 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.12
+    commands:
+      - echo Installing dependencies (if any)
+  build:
+    commands:
+      - echo Zipping Lambda functions
+      - zip -r artifacts/submitData.zip lambda/submitData/*
+      - zip -r artifacts/dlqProcessor.zip lambda/dqlProcessor/*
+      - zip -r artifacts/cleanup.zip lambda/cleanup/*
+  post_build:
+    commands:
+      - echo Uploading Lambda zips to artifact bucket
+      - aws s3 cp artifacts/submitData.zip s3://$ARTIFACT_BUCKET/lambda/
+      - aws s3 cp artifacts/dlqProcessor.zip s3://$ARTIFACT_BUCKET/lambda/
+      - aws s3 cp artifacts/cleanup.zip s3://$ARTIFACT_BUCKET/lambda/
+      - echo Syncing static site to frontend bucket
+      - aws s3 sync static-site/ s3://$STATIC_BUCKET/ --delete
+      - echo Deploying CloudFormation root stack
+      - aws cloudformation deploy \
+          --stack-name devops-root-stack \
+          --template-file templates/root.yaml \
+          --capabilities CAPABILITY_NAMED_IAM
+
+env:
+  variables:
+    ARTIFACT_BUCKET: devops-root-stack-artifacts
+    STATIC_BUCKET: devops-root-stack-frontend
+
+artifacts:
+  files:
+    - artifacts/*.zip
