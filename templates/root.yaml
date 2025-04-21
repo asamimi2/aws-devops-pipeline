@@ -15,6 +15,7 @@ Resources:
 
   LambdaStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn: S3Stack
     Properties:
       TemplateURL: templates/lambda.yaml
       Parameters:
