@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: S3 buckets for frontend hosting and artifact storage
+
+Resources:
+
+  StaticSiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::StackName}-frontend"
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+      AccessControl: PublicRead
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::StackName}-artifacts"
+
+Outputs:
+
+  StaticSiteBucketName:
+    Description: Name of the static site hosting bucket
+    Value: !Ref StaticSiteBucket
+    Export:
+      Name: StaticSiteBucketName
+
+  ArtifactBucketName:
+    Description: Name of the artifact storage bucket
+    Value: !Ref ArtifactBucket
+    Export:
+      Name: ArtifactBucketName

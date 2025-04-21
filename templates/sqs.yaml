@@ -1,0 +1,31 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: SQS queue and Dead Letter Queue for message processing
+
+Resources:
+
+  DeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "${AWS::StackName}-DLQ"
+
+  UserDataQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "${AWS::StackName}-UserQueue"
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn
+        maxReceiveCount: 3
+
+Outputs:
+
+  UserQueueUrl:
+    Description: URL of the primary user data SQS queue
+    Value: !Ref UserDataQueue
+    Export:
+      Name: UserQueueUrl
+
+  DLQUrl:
+    Description: URL of the dead-letter queue
+    Value: !Ref DeadLetterQueue
+    Export:
+      Name: DLQUrl

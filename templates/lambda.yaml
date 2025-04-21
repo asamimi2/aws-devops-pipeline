@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Lambda functions and IAM roles
+
+Parameters:
+  ArtifactBucketName:
+    Type: String
+    Description: Name of the bucket storing Lambda .zip artifacts
+
+Resources:
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AWS::StackName}-LambdaRole"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - sqs:SendMessage
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                Resource: "*"
+
+  SubmitDataFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: SubmitDataFunction
+      Runtime: python3.12
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        S3Bucket: !Ref ArtifactBucketName
+        S3Key: lambda/submitData.zip
+      Timeout: 10
+      Environment:
+        Variables:
+          QUEUE_URL: !ImportValue UserQueueUrl
+
+  DLQProcessorFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: DLQProcessorFunction
+      Runtime: python3.12
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        S3Bucket: !Ref ArtifactBucketName
+        S3Key: lambda/dlqProcessor.zip
+      Timeout: 10
+
+  CleanupFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: CleanupFunction
+      Runtime: python3.12
+      Handler: handler.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        S3Bucket: !Ref ArtifactBucketName
+        S3Key: lambda/cleanup.zip
+      Timeout: 10
+
+Outputs:
+  SubmitDataFunctionArn:
+    Value: !GetAtt SubmitDataFunction.Arn
+    Export:
+      Name: SubmitDataFunctionArn
