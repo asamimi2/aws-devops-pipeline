@@ -1,32 +1,41 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Root stack to deploy complete CI/CD pipeline and serverless application using nested local templates
+Description: Root stack to deploy complete CI/CD pipeline and serverless application using nested templates in S3
+
+Parameters:
+  ArtifactBucketName:
+    Type: String
+    Description: S3 bucket holding Lambda artifacts and templates
+
+  TemplateBaseURL:
+    Type: String
+    Description: Base URL for CloudFormation templates stored in S3
 
 Resources:
 
   S3Stack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: templates/s3.yaml
+      TemplateURL: !Sub "${TemplateBaseURL}s3.yaml"
 
   SQSStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: templates/sqs.yaml
+      TemplateURL: !Sub "${TemplateBaseURL}sqs.yaml"
 
   LambdaStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: S3Stack
     Properties:
-      TemplateURL: templates/lambda.yaml
+      TemplateURL: !Sub "${TemplateBaseURL}lambda.yaml"
       Parameters:
-        ArtifactBucketName: !ImportValue ArtifactBucketName
+        ArtifactBucketName: !Ref ArtifactBucketName
 
   MonitoringStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: templates/monitoring.yaml
+      TemplateURL: !Sub "${TemplateBaseURL}monitoring.yaml"
 
   EventBridgeStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: templates/eventbridge.yaml
+      TemplateURL: !Sub "${TemplateBaseURL}eventbridge.yaml"
