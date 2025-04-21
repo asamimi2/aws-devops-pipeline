@@ -109,17 +109,23 @@ Resources:
                   - iam:PassRole
                 Resource: "*"
 
-  CodeBuildProject:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Name: ServerlessPipelineBuild
-      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
-      Source:
-        Type: CODEPIPELINE
-      Artifacts:
-        Type: CODEPIPELINE
-      Environment:
-        ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/standard:7.0
-        Type: LINUX_CONTAINER
-      TimeoutInMinutes: 10
+CodeBuildProject:
+  Type: AWS::CodeBuild::Project
+  Properties:
+    Name: ServerlessPipelineBuild
+    ServiceRole: !GetAtt CodeBuildServiceRole.Arn
+    Source:
+      Type: CODEPIPELINE
+    Artifacts:
+      Type: CODEPIPELINE
+    Environment:
+      ComputeType: BUILD_GENERAL1_SMALL
+      Image: aws/codebuild/standard:7.0
+      Type: LINUX_CONTAINER
+      EnvironmentVariables:
+        - Name: ARTIFACT_BUCKET
+          Value: !ImportValue ArtifactBucketName
+        - Name: STATIC_BUCKET
+          Value: !ImportValue StaticSiteBucketName
+    TimeoutInMinutes: 10
+
