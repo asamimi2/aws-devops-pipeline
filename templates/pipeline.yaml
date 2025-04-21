@@ -15,6 +15,12 @@ Parameters:
     Default: main
     Description: Branch to monitor
 
+  GitHubOAuthToken:
+    Type: String
+    NoEcho: true
+    Description: GitHub Personal Access Token stored in Secrets Manager
+
+
 Resources:
 
   CodePipelineServiceRole:
