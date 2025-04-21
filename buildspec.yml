@@ -13,13 +13,13 @@ phases:
       - zip -r artifacts/dlqProcessor.zip lambda/dqlProcessor
       - zip -r artifacts/cleanup.zip lambda/cleanup
 
-      - echo "Uploading Lambda .zip files to S3..."
+      - echo "Uploading Lambda artifacts to S3..."
       - aws s3 cp artifacts/ s3://$ARTIFACT_BUCKET/lambda/ --recursive
 
-      - echo "Uploading CloudFormation templates to S3..."
-      - aws s3 cp templates/ s3://$ARTIFACT_BUCKET/templates/ --recursive
+      - echo "Uploading CloudFormation templates to S3 (with public-read)..."
+      - aws s3 cp templates/ s3://$ARTIFACT_BUCKET/templates/ --recursive --acl public-read
 
-      - echo "Deploying root CloudFormation stack..."
+      - echo "Deploying root stack from remote template URLs..."
       - aws cloudformation deploy \
           --template-file templates/root.yaml \
           --stack-name devops-root-stack \
