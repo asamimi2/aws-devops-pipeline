@@ -1,14 +1,13 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Root stack to orchestrate all sub-stacks and create required buckets
+Description: Root stack to orchestrate all sub-stacks and resources
 
 Parameters:
   TemplateBaseURL:
     Type: String
-    Description: Base S3 URL where templates are stored (e.g., https://your-bucket.s3.amazonaws.com/templates/)
+    Description: Base S3 URL where templates are stored (e.g., https://bucket-name.s3.amazonaws.com/templates/)
 
 Resources:
 
-  # --- S3 Buckets for Artifacts & Frontend ---
   StaticSiteBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -28,7 +27,6 @@ Resources:
     Properties:
       BucketName: !Sub "${AWS::StackName}-artifacts"
 
-  # --- Sub-stacks ---
   PipelineStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: ArtifactBucket
@@ -39,6 +37,8 @@ Resources:
         GitHubOwner: asamimi2
         GitHubBranch: main
         GitHubOAuthToken: "{{resolve:secretsmanager:GitHubToken:SecretString}}"
+        ArtifactBucketName: !Ref ArtifactBucket
+        StaticSiteBucketName: !Ref StaticSiteBucket
 
   LambdaStack:
     Type: AWS::CloudFormation::Stack
@@ -61,15 +61,10 @@ Resources:
       TemplateURL: !Sub "${TemplateBaseURL}monitoring.yaml"
 
 Outputs:
-
   StaticSiteBucketName:
-    Description: Name of the static site hosting bucket
+    Description: Static site bucket
     Value: !Ref StaticSiteBucket
-    Export:
-      Name: StaticSiteBucketName
 
   ArtifactBucketName:
-    Description: Name of the artifact storage bucket
+    Description: Artifact bucket
     Value: !Ref ArtifactBucket
-    Export:
-      Name: ArtifactBucketName
