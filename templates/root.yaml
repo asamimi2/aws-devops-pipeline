@@ -1,37 +1,49 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Root stack to orchestrate all sub-stacks
+Description: Root stack to orchestrate all sub-stacks and create required buckets
 
 Parameters:
-  ArtifactBucketName:
-    Type: String
-    Description: S3 bucket for artifacts and templates
-
   TemplateBaseURL:
     Type: String
-    Description: Base S3 URL where templates are stored (e.g., https://bucket-name.s3.amazonaws.com/templates/)
+    Description: Base S3 URL where templates are stored (e.g., https://your-bucket.s3.amazonaws.com/templates/)
 
 Resources:
 
+  # --- S3 Buckets for Artifacts & Frontend ---
+  StaticSiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::StackName}-frontend"
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+      AccessControl: PublicRead
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::StackName}-artifacts"
+
+  # --- Sub-stacks ---
   PipelineStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: S3Stack
+    DependsOn: ArtifactBucket
     Properties:
       TemplateURL: !Sub "${TemplateBaseURL}pipeline.yaml"
       Parameters:
         GitHubRepo: aws-devops-pipeline
         GitHubOwner: asamimi2
         GitHubBranch: main
-        GitHubOAuthToken: "{{resolve:ssm:/github/token}}"
+        GitHubOAuthToken: "{{resolve:secretsmanager:GitHubToken:SecretString}}"
 
   LambdaStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub "${TemplateBaseURL}lambda.yaml"
-
-  S3Stack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub "${TemplateBaseURL}s3.yaml"
 
   EventBridgeStack:
     Type: AWS::CloudFormation::Stack
@@ -47,3 +59,17 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub "${TemplateBaseURL}monitoring.yaml"
+
+Outputs:
+
+  StaticSiteBucketName:
+    Description: Name of the static site hosting bucket
+    Value: !Ref StaticSiteBucket
+    Export:
+      Name: StaticSiteBucketName
+
+  ArtifactBucketName:
+    Description: Name of the artifact storage bucket
+    Value: !Ref ArtifactBucket
+    Export:
+      Name: ArtifactBucketName
