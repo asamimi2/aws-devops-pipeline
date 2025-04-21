@@ -32,6 +32,9 @@ Resources:
                   - sqs:SendMessage
                   - sqs:ReceiveMessage
                   - sqs:DeleteMessage
+                  - s3:ListBucket
+                  - s3:DeleteObject
+                  - s3:GetObject
                 Resource: "*"
 
   SubmitDataFunction:
@@ -58,7 +61,7 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Code:
         S3Bucket: !Ref ArtifactBucketName
-        S3Key: lambda/dlqProcessor.zip
+        S3Key: lambda/dqlProcessor.zip
       Timeout: 10
 
   CleanupFunction:
@@ -72,9 +75,17 @@ Resources:
         S3Bucket: !Ref ArtifactBucketName
         S3Key: lambda/cleanup.zip
       Timeout: 10
+      Environment:
+        Variables:
+          BUCKET_NAME: !Sub "${AWS::StackName}-frontend"
 
 Outputs:
   SubmitDataFunctionArn:
     Value: !GetAtt SubmitDataFunction.Arn
     Export:
       Name: SubmitDataFunctionArn
+
+  CleanupFunctionArn:
+    Value: !GetAtt CleanupFunction.Arn
+    Export:
+      Name: CleanupFunctionArn
