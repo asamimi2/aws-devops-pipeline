@@ -25,7 +25,6 @@ Resources:
   CodePipelineServiceRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: CodePipelineServiceRole
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -33,6 +32,7 @@ Resources:
             Principal:
               Service: codepipeline.amazonaws.com
             Action: sts:AssumeRole
+      Path: "/"
       Policies:
         - PolicyName: CodePipelinePolicy
           PolicyDocument:
@@ -43,6 +43,31 @@ Resources:
                   - s3:*
                   - codebuild:*
                   - cloudformation:*
+                  - iam:PassRole
+                Resource: "*"
+
+  CodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: CodeBuildPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:*
+                  - cloudformation:*
+                  - logs:*
+                  - lambda:*
                   - iam:PassRole
                 Resource: "*"
 
@@ -66,7 +91,6 @@ Resources:
             Value: !ImportValue StaticSiteBucketName
       TimeoutInMinutes: 10
 
-  
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
@@ -90,6 +114,8 @@ Resources:
                 Repo: !Ref GitHubRepo
                 Branch: !Ref GitHubBranch
                 OAuthToken: !Ref GitHubOAuthToken
+              RunOrder: 1
+
         - Name: Build
           Actions:
             - Name: CodeBuild_Action
@@ -104,28 +130,4 @@ Resources:
                 - Name: BuildOutput
               Configuration:
                 ProjectName: !Ref CodeBuildProject
-
-  CodeBuildServiceRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: CodeBuildServiceRole
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: codebuild.amazonaws.com
-            Action: sts:AssumeRole
-      Policies:
-        - PolicyName: CodeBuildPolicy
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:*
-                  - cloudformation:*
-                  - logs:*
-                  - lambda:*
-                  - iam:PassRole
-                Resource: "*"
+              RunOrder: 1

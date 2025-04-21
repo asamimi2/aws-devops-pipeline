@@ -10,7 +10,7 @@ phases:
       - echo "Zipping Lambda functions..."
       - mkdir -p artifacts
       - zip -r artifacts/submitData.zip lambda/submitData
-      - zip -r artifacts/dlqProcessor.zip lambda/dqlProcessor
+      - zip -r artifacts/dlqProcessor.zip lambda/dlqProcessor
       - zip -r artifacts/cleanup.zip lambda/cleanup
 
       - echo "Uploading Lambda artifacts to S3..."
