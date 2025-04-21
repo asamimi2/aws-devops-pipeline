@@ -2,18 +2,18 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: CodePipeline for CI/CD deployment of serverless app
 
 Parameters:
-  GitHubRepo:
+  GitHubRepo: 
     Type: String
-  GitHubOwner:
+  GitHubOwner: 
     Type: String
-  GitHubBranch:
+  GitHubBranch: 
     Type: String
-  GitHubOAuthToken:
+  GitHubOAuthToken: 
     Type: String
     NoEcho: true
-  ArtifactBucketName:
+  ArtifactBucketName: 
     Type: String
-  StaticSiteBucketName:
+  StaticSiteBucketName: 
     Type: String
 
 Resources:
@@ -90,10 +90,12 @@ Resources:
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
+      Name: ServerlessPipeline
       RoleArn: !GetAtt CodePipelineServiceRole.Arn
       ArtifactStore:
         Type: S3
         Location: !Ref ArtifactBucketName
+      RestartExecutionOnUpdate: true
       Stages:
         - Name: Source
           Actions:
@@ -124,3 +126,12 @@ Resources:
                 - Name: BuildOutput
               Configuration:
                 ProjectName: !Ref CodeBuildProject
+
+Outputs:
+  PipelineName:
+    Description: Name of the deployed CodePipeline
+    Value: !Ref Pipeline
+
+  CodeBuildProjectName:
+    Description: Name of the CodeBuild project
+    Value: !Ref CodeBuildProject

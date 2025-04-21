@@ -1,10 +1,16 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Root stack to orchestrate all sub-stacks and resources
+Description: Root stack that orchestrates all resources and pipelines
 
 Parameters:
-  TemplateBaseURL:
+  GitHubRepo:
     Type: String
-    Description: Base S3 URL where templates are stored (e.g., https://bucket-name.s3.amazonaws.com/templates/)
+  GitHubOwner:
+    Type: String
+  GitHubBranch:
+    Type: String
+  GitHubOAuthToken:
+    Type: String
+    NoEcho: true
 
 Resources:
 
@@ -33,38 +39,21 @@ Resources:
     Properties:
       TemplateURL: !Sub "${TemplateBaseURL}pipeline.yaml"
       Parameters:
-        GitHubRepo: aws-devops-pipeline
-        GitHubOwner: asamimi2
-        GitHubBranch: main
-        GitHubOAuthToken: "{{resolve:secretsmanager:GitHubToken:SecretString}}"
+        GitHubRepo: !Ref GitHubRepo
+        GitHubOwner: !Ref GitHubOwner
+        GitHubBranch: !Ref GitHubBranch
+        GitHubOAuthToken: !Ref GitHubOAuthToken
         ArtifactBucketName: !Ref ArtifactBucket
         StaticSiteBucketName: !Ref StaticSiteBucket
 
+  # Add other stacks as needed
   LambdaStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub "${TemplateBaseURL}lambda.yaml"
 
-  EventBridgeStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub "${TemplateBaseURL}eventbridge.yaml"
-
-  SQSStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub "${TemplateBaseURL}sqs.yaml"
-
-  MonitoringStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub "${TemplateBaseURL}monitoring.yaml"
-
 Outputs:
-  StaticSiteBucketName:
-    Description: Static site bucket
-    Value: !Ref StaticSiteBucket
-
   ArtifactBucketName:
-    Description: Artifact bucket
     Value: !Ref ArtifactBucket
+  StaticSiteBucketName:
+    Value: !Ref StaticSiteBucket
