@@ -8,23 +8,19 @@ Parameters:
 
   GitHubOwner:
     Type: String
-    Description: GitHub username or org
+    Description: GitHub username or organization
 
   GitHubBranch:
     Type: String
     Default: main
     Description: Branch to monitor
 
-  GitHubOAuthToken:
-    Type: String
-    NoEcho: true
-    Description: GitHub personal access token
-
 Resources:
 
   CodePipelineServiceRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: CodePipelineServiceRole
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -32,7 +28,6 @@ Resources:
             Principal:
               Service: codepipeline.amazonaws.com
             Action: sts:AssumeRole
-      Path: "/"
       Policies:
         - PolicyName: CodePipelinePolicy
           PolicyDocument:
@@ -49,6 +44,7 @@ Resources:
   CodeBuildServiceRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: CodeBuildServiceRole
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -56,7 +52,6 @@ Resources:
             Principal:
               Service: codebuild.amazonaws.com
             Action: sts:AssumeRole
-      Path: "/"
       Policies:
         - PolicyName: CodeBuildPolicy
           PolicyDocument:
@@ -113,9 +108,7 @@ Resources:
                 Owner: !Ref GitHubOwner
                 Repo: !Ref GitHubRepo
                 Branch: !Ref GitHubBranch
-                OAuthToken: !Ref GitHubOAuthToken
-              RunOrder: 1
-
+                OAuthToken: "{{resolve:secretsmanager:GitHubToken:SecretString}}"
         - Name: Build
           Actions:
             - Name: CodeBuild_Action
@@ -130,4 +123,3 @@ Resources:
                 - Name: BuildOutput
               Configuration:
                 ProjectName: !Ref CodeBuildProject
-              RunOrder: 1
