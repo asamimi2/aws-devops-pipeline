@@ -14,13 +14,14 @@ Resources:
 
   PipelineStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn: S3Stack
     Properties:
       TemplateURL: !Sub "${TemplateBaseURL}pipeline.yaml"
       Parameters:
         GitHubRepo: aws-devops-pipeline
         GitHubOwner: asamimi2
         GitHubBranch: main
-        GitHubOAuthToken: "{{resolve:ssm:/github/token}}"  # You can replace this with direct string if testing
+        GitHubOAuthToken: "{{resolve:ssm:/github/token}}"
 
   LambdaStack:
     Type: AWS::CloudFormation::Stack
