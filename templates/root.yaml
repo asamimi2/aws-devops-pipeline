@@ -89,18 +89,18 @@ Resources:
       TemplateURL: !Sub "${TemplateBaseURL}monitoring.yaml"
 
   # === Pipeline Stack ===
-  PipelineStack:
-    Type: AWS::CloudFormation::Stack
-    DependsOn: [StaticSiteBucket]  # Ensure StaticSiteBucket is created first
-    Properties:
-      TemplateURL: !Sub "${TemplateBaseURL}pipeline.yaml"
-      Parameters:
-        GitHubRepo: !Ref GitHubRepo
-        GitHubOwner: !Ref GitHubOwner
-        GitHubBranch: !Ref GitHubBranch
-        GitHubOAuthToken: !Ref GitHubOAuthToken
-        ArtifactBucketName: !Ref ArtifactBucketName
-        StaticSiteBucketName: !Ref StaticSiteBucket
+PipelineStack:
+  Type: AWS::CloudFormation::Stack
+  DependsOn: [StaticSiteBucket, StaticSiteBucketPolicy]  # Ensure StaticSiteBucket and its Policy are created first
+  Properties:
+    TemplateURL: !Sub "${TemplateBaseURL}pipeline.yaml"
+    Parameters:
+      GitHubRepo: !Ref GitHubRepo
+      GitHubOwner: !Ref GitHubOwner
+      GitHubBranch: !Ref GitHubBranch
+      GitHubOAuthToken: !Ref GitHubOAuthToken
+      ArtifactBucketName: !Ref ArtifactBucketName
+      StaticSiteBucketName: !Ref StaticSiteBucket
 
 Outputs:
   StaticSiteBucketName:
