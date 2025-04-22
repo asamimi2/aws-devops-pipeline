@@ -76,6 +76,8 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub "${TemplateBaseURL}lambda.yaml"
+      Parameters:
+        ArtifactBucketName: !Ref ArtifactBucketName
 
   EventBridgeStack:
     Type: AWS::CloudFormation::Stack
