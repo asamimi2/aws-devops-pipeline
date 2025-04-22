@@ -25,6 +25,10 @@ Parameters:
     Type: String
     Description: Full S3 URL to templates folder (e.g., https://bucket.s3.amazonaws.com/templates/)
 
+  ArtifactBucketName:  # Make sure this is defined as a parameter
+    Type: String
+    Description: The name of the artifact bucket created in the bootstrap stack.
+
   devopsBootstrapStackArtifactBucketName:
     Type: String
     Description: The artifact bucket name from the bootstrap stack
