@@ -11,6 +11,10 @@ Parameters:
   GitHubOAuthToken:
     Type: String
     NoEcho: true
+  ArtifactBucketName:
+    Type: String
+  StaticSiteBucketName:
+    Type: String
 
 Resources:
 

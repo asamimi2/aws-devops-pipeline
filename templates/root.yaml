@@ -29,8 +29,7 @@ Parameters:
     Description: Full S3 URL to templates folder (e.g., https://bucket.s3.amazonaws.com/templates/)
 
 Resources:
-
-  # === Static Site Bucket ===
+  # Static Site Bucket
   StaticSiteBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -58,6 +57,7 @@ Resources:
             Principal: "*"
             Action: s3:GetObject
             Resource: !Sub "arn:aws:s3:::${StaticSiteBucket}/*"
+
 
   # === SQS Stack (must come first to export UserQueueUrl) ===
   SQSStack:
@@ -91,7 +91,7 @@ Resources:
   # === Pipeline Stack ===
   PipelineStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: [StaticSiteBucket]
+    DependsOn: [StaticSiteBucket]  # Ensure StaticSiteBucket is created first
     Properties:
       TemplateURL: !Sub "${TemplateBaseURL}pipeline.yaml"
       Parameters:
