@@ -84,6 +84,7 @@ Resources:
   # === Monitoring Stack ===
   MonitoringStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn: [LambdaStack]
     Properties:
       TemplateURL: !Sub "${TemplateBaseURL}monitoring.yaml"
 
