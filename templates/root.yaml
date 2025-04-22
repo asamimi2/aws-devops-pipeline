@@ -20,9 +20,17 @@ Parameters:
     NoEcho: true
     Description: GitHub personal access token stored in Secrets Manager
 
+  ArtifactBucketName:
+    Type: String
+    Description: Name of the pre-created artifact bucket
+
+  TemplateBaseURL:
+    Type: String
+    Description: Full S3 URL to templates folder (e.g., https://bucket.s3.amazonaws.com/templates/)
+
 Resources:
 
-  # === Static Site Hosting Bucket ===
+  # Static Site Bucket
   StaticSiteBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -51,60 +59,42 @@ Resources:
             Action: s3:GetObject
             Resource: !Sub "arn:aws:s3:::${StaticSiteBucket}/*"
 
-  # === Artifact Storage Bucket ===
-  ArtifactBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub "${AWS::StackName}-artifacts"
-
-  # === Pipeline Stack ===
   PipelineStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: [ArtifactBucket, StaticSiteBucket]
+    DependsOn: [StaticSiteBucket]
     Properties:
-      TemplateURL: !Sub "https://${ArtifactBucket}.s3.amazonaws.com/templates/pipeline.yaml"
+      TemplateURL: !Sub "${TemplateBaseURL}pipeline.yaml"
       Parameters:
         GitHubRepo: !Ref GitHubRepo
         GitHubOwner: !Ref GitHubOwner
         GitHubBranch: !Ref GitHubBranch
         GitHubOAuthToken: !Ref GitHubOAuthToken
-        ArtifactBucketName: !Ref ArtifactBucket
+        ArtifactBucketName: !Ref ArtifactBucketName
         StaticSiteBucketName: !Ref StaticSiteBucket
 
-  # === Optional: Lambda Stack ===
   LambdaStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub "https://${ArtifactBucket}.s3.amazonaws.com/templates/lambda.yaml"
+      TemplateURL: !Sub "${TemplateBaseURL}lambda.yaml"
 
-  # === Optional: EventBridge Stack ===
   EventBridgeStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub "https://${ArtifactBucket}.s3.amazonaws.com/templates/eventbridge.yaml"
+      TemplateURL: !Sub "${TemplateBaseURL}eventbridge.yaml"
 
-  # === Optional: SQS Stack ===
   SQSStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub "https://${ArtifactBucket}.s3.amazonaws.com/templates/sqs.yaml"
+      TemplateURL: !Sub "${TemplateBaseURL}sqs.yaml"
 
-  # === Optional: Monitoring Stack ===
   MonitoringStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub "https://${ArtifactBucket}.s3.amazonaws.com/templates/monitoring.yaml"
+      TemplateURL: !Sub "${TemplateBaseURL}monitoring.yaml"
 
 Outputs:
-
-  ArtifactBucketName:
-    Description: Name of the artifact bucket
-    Value: !Ref ArtifactBucket
-    Export:
-      Name: ArtifactBucketName
-
   StaticSiteBucketName:
-    Description: Name of the static hosting bucket
+    Description: Name of the static site bucket
     Value: !Ref StaticSiteBucket
     Export:
       Name: StaticSiteBucketName
