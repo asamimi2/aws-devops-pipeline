@@ -58,7 +58,6 @@ Resources:
             Action: s3:GetObject
             Resource: !Sub "arn:aws:s3:::${StaticSiteBucket}/*"
 
-
   # === SQS Stack (must come first to export UserQueueUrl) ===
   SQSStack:
     Type: AWS::CloudFormation::Stack
