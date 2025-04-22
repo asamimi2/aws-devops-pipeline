@@ -5,10 +5,12 @@ Parameters:
   GitHubRepo:
     Type: String
     Description: GitHub repository name (e.g., aws-devops-pipeline)
+    Default: "aws-devops-pipeline"  # Default value for GitHub Repo
 
   GitHubOwner:
     Type: String
     Description: GitHub username or organization
+    Default: "asamimi2"  # Default value for GitHub Owner
 
   GitHubBranch:
     Type: String
@@ -24,10 +26,12 @@ Parameters:
   TemplateBaseURL:
     Type: String
     Description: Full S3 URL to templates folder (e.g., https://bucket.s3.amazonaws.com/templates/)
+    Default: "https://devops-bootstrap-stack-artifacts.s3.us-east-2.amazonaws.com/templates/"
 
   ArtifactBucketName:
     Type: String
     Description: The name of the artifact bucket created in the bootstrap stack.
+    Default: "devops-bootstrap-stack-artifacts"  # Default value for ArtifactBucketName
 
 Resources:
   # Static Site Bucket
@@ -100,11 +104,11 @@ Resources:
         GitHubBranch: !Ref GitHubBranch
         GitHubOAuthToken: !Ref GitHubOAuthToken
         ArtifactBucketName: !Ref ArtifactBucketName
-        StaticSiteBucketName: !ImportValue "devops-bootstrap-stack-StaticSiteBucketName"  # Importing the StaticSiteBucketName from the bootstrap stack
+        StaticSiteBucketName: !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:output/${AWS::StackName}-StaticSiteBucketName"
 
 Outputs:
   StaticSiteBucketName:
     Description: Name of the static site bucket
     Value: !Ref StaticSiteBucket
     Export:
-      Name: !Sub "${AWS::StackName}-StaticSiteBucketName"  # Exported with a unique name
+      Name: !Sub "${AWS::StackName}-StaticSiteBucketName"
