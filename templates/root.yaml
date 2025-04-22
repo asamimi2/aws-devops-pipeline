@@ -63,14 +63,14 @@ Resources:
   SQSStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub "${TemplateBaseURL}sqs.yaml"
+      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/sqs.yaml"
 
   # === Lambda Stack (depends on SQS export) ===
   LambdaStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: [SQSStack]
     Properties:
-      TemplateURL: !Sub "${TemplateBaseURL}lambda.yaml"
+      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/lambda.yaml"
       Parameters:
         ArtifactBucketName: !Ref ArtifactBucketName
 
@@ -79,21 +79,21 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: [LambdaStack]
     Properties:
-      TemplateURL: !Sub "${TemplateBaseURL}eventbridge.yaml"
+      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/eventbridge.yaml"
 
   # === Monitoring Stack ===
   MonitoringStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: [LambdaStack]
     Properties:
-      TemplateURL: !Sub "${TemplateBaseURL}monitoring.yaml"
+      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/monitoring.yaml"
 
   # === Pipeline Stack ===
   PipelineStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: [StaticSiteBucket, StaticSiteBucketPolicy]  # Ensure StaticSiteBucket and its Policy are created first
     Properties:
-      TemplateURL: !Sub "${TemplateBaseURL}pipeline.yaml"
+      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
       Parameters:
         GitHubRepo: !Ref GitHubRepo
         GitHubOwner: !Ref GitHubOwner
