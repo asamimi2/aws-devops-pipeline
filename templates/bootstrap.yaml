@@ -8,6 +8,14 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: devops-bootstrap-stack-artifacts
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: false
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: false
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
 
   # Create the IAM Role for CodeBuild
   BootstrapCodeBuildRole:
@@ -55,10 +63,23 @@ Resources:
       Artifacts:
         Type: NO_ARTIFACTS
 
+  # S3 Bucket Policy to allow public read access for all objects in Artifact Bucket
+  ArtifactBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ArtifactBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action: s3:GetObject
+            Resource: !Sub "arn:aws:s3:::${ArtifactBucket}/*"
+
 Outputs:
   # Export the ArtifactBucketName so it can be referenced by the root stack
   ArtifactBucketName:
     Value: !Ref ArtifactBucket
     Export:
       Name: devops-bootstrap-stack-ArtifactBucketName
-
