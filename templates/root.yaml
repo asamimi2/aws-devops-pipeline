@@ -1,19 +1,28 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Root stack to orchestrate all sub-stacks and resources
+Description: Root stack to orchestrate all sub-stacks and create required S3 buckets
 
 Parameters:
   GitHubRepo:
     Type: String
+    Description: GitHub repository name (e.g., aws-devops-pipeline)
+
   GitHubOwner:
     Type: String
+    Description: GitHub username or organization
+
   GitHubBranch:
     Type: String
+    Default: main
+    Description: Branch to monitor
+
   GitHubOAuthToken:
     Type: String
     NoEcho: true
+    Description: GitHub personal access token stored in Secrets Manager
 
 Resources:
 
+  # === Static Site Hosting Bucket ===
   StaticSiteBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -21,37 +30,81 @@ Resources:
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: index.html
-      AccessControl: PublicRead
       PublicAccessBlockConfiguration:
-        BlockPublicAcls: false
+        BlockPublicAcls: true
         BlockPublicPolicy: false
-        IgnorePublicAcls: false
+        IgnorePublicAcls: true
         RestrictPublicBuckets: false
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
 
+  StaticSiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref StaticSiteBucket
+      PolicyDocument:
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action: s3:GetObject
+            Resource: !Sub "arn:aws:s3:::${StaticSiteBucket}/*"
+
+  # === Artifact Storage Bucket ===
   ArtifactBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub "${AWS::StackName}-artifacts"
 
+  # === Pipeline Stack ===
   PipelineStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: ArtifactBucket
+    DependsOn: [ArtifactBucket, StaticSiteBucket]
     Properties:
-      TemplateURL: !Sub "https://${AWS::StackName}-artifacts.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
+      TemplateURL: !Sub "https://${ArtifactBucket}.s3.amazonaws.com/templates/pipeline.yaml"
       Parameters:
         GitHubRepo: !Ref GitHubRepo
         GitHubOwner: !Ref GitHubOwner
         GitHubBranch: !Ref GitHubBranch
         GitHubOAuthToken: !Ref GitHubOAuthToken
+        ArtifactBucketName: !Ref ArtifactBucket
+        StaticSiteBucketName: !Ref StaticSiteBucket
+
+  # === Optional: Lambda Stack ===
+  LambdaStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${ArtifactBucket}.s3.amazonaws.com/templates/lambda.yaml"
+
+  # === Optional: EventBridge Stack ===
+  EventBridgeStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${ArtifactBucket}.s3.amazonaws.com/templates/eventbridge.yaml"
+
+  # === Optional: SQS Stack ===
+  SQSStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${ArtifactBucket}.s3.amazonaws.com/templates/sqs.yaml"
+
+  # === Optional: Monitoring Stack ===
+  MonitoringStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${ArtifactBucket}.s3.amazonaws.com/templates/monitoring.yaml"
 
 Outputs:
 
-  StaticSiteBucketName:
-    Value: !Ref StaticSiteBucket
-    Export:
-      Name: StaticSiteBucketName
-
   ArtifactBucketName:
+    Description: Name of the artifact bucket
     Value: !Ref ArtifactBucket
     Export:
       Name: ArtifactBucketName
+
+  StaticSiteBucketName:
+    Description: Name of the static hosting bucket
+    Value: !Ref StaticSiteBucket
+    Export:
+      Name: StaticSiteBucketName
