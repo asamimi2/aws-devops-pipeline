@@ -104,7 +104,7 @@ Resources:
         GitHubBranch: !Ref GitHubBranch
         GitHubOAuthToken: !Ref GitHubOAuthToken
         ArtifactBucketName: !Ref ArtifactBucketName
-        StaticSiteBucketName: !ImportValue !Sub "${AWS::StackName}-StaticSiteBucketName"  # Correctly referencing the exported value
+        StaticSiteBucketName: !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:output/${AWS::StackName}-StaticSiteBucketName"
 
 Outputs:
   StaticSiteBucketName:
