@@ -13,17 +13,25 @@ phases:
       - zip -r artifacts/dlqProcessor.zip lambda/dlqProcessor
       - zip -r artifacts/cleanup.zip lambda/cleanup
 
-      - echo "Uploading Lambda artifacts to S3..."
-      - aws s3 cp artifacts/ s3://$ARTIFACT_BUCKET/lambda/ --recursive
-
-      - echo "Uploading CloudFormation templates to S3 (with public-read)..."
-      - aws s3 cp templates/ s3://$ARTIFACT_BUCKET/templates/ --recursive --acl public-read
-
-      - echo "Deploying root stack from remote template URLs..."
+      - echo "Deploying root stack to create buckets..."
       - aws cloudformation deploy \
           --template-file templates/root.yaml \
           --stack-name devops-root-stack \
           --capabilities CAPABILITY_NAMED_IAM \
           --parameter-overrides \
-              ArtifactBucketName=$ARTIFACT_BUCKET \
-              TemplateBaseURL=https://$ARTIFACT_BUCKET.s3.amazonaws.com/templates/
+              GitHubRepo=aws-devops-pipeline \
+              GitHubOwner=asamimi2 \
+              GitHubBranch=main \
+              GitHubOAuthToken={{resolve:secretsmanager:GitHubToken:SecretString}}
+
+      - echo "Retrieving newly created ArtifactBucket from stack outputs..."
+      - export ARTIFACT_BUCKET=$(aws cloudformation describe-stacks \
+          --stack-name devops-root-stack \
+          --query "Stacks[0].Outputs[?OutputKey=='ArtifactBucketName'].OutputValue" \
+          --output text)
+
+      - echo "Uploading Lambda artifacts to S3..."
+      - aws s3 cp artifacts/ s3://$ARTIFACT_BUCKET/lambda/ --recursive
+
+      - echo "Uploading CloudFormation templates to S3..."
+      - aws s3 cp templates/ s3://$ARTIFACT_BUCKET/templates/ --recursive --acl public-read
