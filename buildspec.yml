@@ -17,7 +17,7 @@ phases:
       - aws s3 cp artifacts/ s3://$ARTIFACT_BUCKET/lambda/ --recursive
 
       - echo "Uploading CloudFormation templates to S3..."
-      - aws s3 cp templates/ s3://$ARTIFACT_BUCKET/templates/ --recursive --acl public-read
+      - aws s3 cp templates/ s3://$ARTIFACT_BUCKET/templates/ --recursive
 
       - echo "Deploying root stack..."
       - aws cloudformation deploy \
