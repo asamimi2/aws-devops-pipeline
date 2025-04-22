@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Root stack that orchestrates all resources and pipelines
+Description: Root stack to orchestrate all sub-stacks and resources
 
 Parameters:
   GitHubRepo:
@@ -37,23 +37,21 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: ArtifactBucket
     Properties:
-      TemplateURL: !Sub "${TemplateBaseURL}pipeline.yaml"
+      TemplateURL: !Sub "https://${AWS::StackName}-artifacts.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
       Parameters:
         GitHubRepo: !Ref GitHubRepo
         GitHubOwner: !Ref GitHubOwner
         GitHubBranch: !Ref GitHubBranch
         GitHubOAuthToken: !Ref GitHubOAuthToken
-        ArtifactBucketName: !Ref ArtifactBucket
-        StaticSiteBucketName: !Ref StaticSiteBucket
-
-  # Add other stacks as needed
-  LambdaStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub "${TemplateBaseURL}lambda.yaml"
 
 Outputs:
-  ArtifactBucketName:
-    Value: !Ref ArtifactBucket
+
   StaticSiteBucketName:
     Value: !Ref StaticSiteBucket
+    Export:
+      Name: StaticSiteBucketName
+
+  ArtifactBucketName:
+    Value: !Ref ArtifactBucket
+    Export:
+      Name: ArtifactBucketName
