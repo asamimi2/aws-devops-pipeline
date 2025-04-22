@@ -42,6 +42,7 @@ Resources:
                   - secretsmanager:GetSecretValue
                 Resource: "*"
 
+
   # Create the CodeBuild Project
   BootstrapBuildProject:
     Type: AWS::CodeBuild::Project
