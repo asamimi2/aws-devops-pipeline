@@ -33,46 +33,46 @@ Resources:
   BootstrapBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: BootstrapRootDeploy
-      Source:
-        Type: NO_SOURCE
+      Name: BootstrapBuildProject
+      ServiceRole: !GetAtt BootstrapCodeBuildRole.Arn
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:7.0
         Type: LINUX_CONTAINER
         EnvironmentVariables:
           - Name: ARTIFACT_BUCKET
-            Value: devops-bootstrap-stack-artifacts
-      ServiceRole: !GetAtt BootstrapCodeBuildRole.Arn
-      TimeoutInMinutes: 10
-      BuildSpec: |
-        version: 0.2
-        phases:
-          install:
-            runtime-versions:
-              python: 3.12
-          build:
-            commands:
-              - echo "Zipping Lambda functions..."
-              - mkdir -p artifacts
-              - zip -r artifacts/submitData.zip lambda/submitData
-              - zip -r artifacts/dlqProcessor.zip lambda/dlqProcessor
-              - zip -r artifacts/cleanup.zip lambda/cleanup
-              
-              - echo "Uploading artifacts..."
-              - aws s3 cp artifacts/ s3://$ARTIFACT_BUCKET/lambda/ --recursive
-              - aws s3 cp templates/ s3://$ARTIFACT_BUCKET/templates/ --recursive --acl public-read
-
-              - echo "Deploying root stack..."
-              - aws cloudformation deploy \
-                  --template-file templates/root.yaml \
-                  --stack-name devops-root-stack \
-                  --capabilities CAPABILITY_NAMED_IAM \
-                  --parameter-overrides \
-                      GitHubRepo=aws-devops-pipeline \
-                      GitHubOwner=asamimi2 \
-                      GitHubBranch=main \
-                      GitHubOAuthToken={{resolve:secretsmanager:GitHubToken:SecretString}}
+            Value: !Ref ArtifactBucket
+      Source:
+        Type: NO_SOURCE
+        BuildSpec: |
+          version: 0.2
+          phases:
+            install:
+              runtime-versions:
+                python: 3.12
+            build:
+              commands:
+                - echo "Zipping Lambda functions..."
+                - mkdir -p artifacts
+                - zip -r artifacts/submitData.zip lambda/submitData
+                - zip -r artifacts/dlqProcessor.zip lambda/dlqProcessor
+                - zip -r artifacts/cleanup.zip lambda/cleanup
+                - echo "Uploading Lambda artifacts to S3..."
+                - aws s3 cp artifacts/ s3://$ARTIFACT_BUCKET/lambda/ --recursive
+                - echo "Uploading CloudFormation templates to S3..."
+                - aws s3 cp templates/ s3://$ARTIFACT_BUCKET/templates/ --recursive --acl public-read
+                - echo "Deploying root stack..."
+                - aws cloudformation deploy \
+                    --template-file templates/root.yaml \
+                    --stack-name devops-root-stack \
+                    --capabilities CAPABILITY_NAMED_IAM \
+                    --parameter-overrides \
+                        GitHubRepo=aws-devops-pipeline \
+                        GitHubOwner=asamimi2 \
+                        GitHubBranch=main \
+                        GitHubOAuthToken='{{resolve:secretsmanager:GitHubToken:SecretString}}' \
+                        ArtifactBucketName=$ARTIFACT_BUCKET \
+                        TemplateBaseURL=https://$ARTIFACT_BUCKET.s3.amazonaws.com/templates/
 
 Outputs:
   ArtifactBucketName:
