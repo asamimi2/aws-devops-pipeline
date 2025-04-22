@@ -30,7 +30,7 @@ Parameters:
 
 Resources:
 
-  # Static Site Bucket
+  # === Static Site Bucket ===
   StaticSiteBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -59,6 +59,34 @@ Resources:
             Action: s3:GetObject
             Resource: !Sub "arn:aws:s3:::${StaticSiteBucket}/*"
 
+  # === SQS Stack (must come first to export UserQueueUrl) ===
+  SQSStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBaseURL}sqs.yaml"
+
+  # === Lambda Stack (depends on SQS export) ===
+  LambdaStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: [SQSStack]
+    Properties:
+      TemplateURL: !Sub "${TemplateBaseURL}lambda.yaml"
+      Parameters:
+        ArtifactBucketName: !Ref ArtifactBucketName
+
+  # === EventBridge Stack ===
+  EventBridgeStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBaseURL}eventbridge.yaml"
+
+  # === Monitoring Stack ===
+  MonitoringStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "${TemplateBaseURL}monitoring.yaml"
+
+  # === Pipeline Stack ===
   PipelineStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: [StaticSiteBucket]
@@ -71,28 +99,6 @@ Resources:
         GitHubOAuthToken: !Ref GitHubOAuthToken
         ArtifactBucketName: !Ref ArtifactBucketName
         StaticSiteBucketName: !Ref StaticSiteBucket
-
-  LambdaStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub "${TemplateBaseURL}lambda.yaml"
-      Parameters:
-        ArtifactBucketName: !Ref ArtifactBucketName
-
-  EventBridgeStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub "${TemplateBaseURL}eventbridge.yaml"
-
-  SQSStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub "${TemplateBaseURL}sqs.yaml"
-
-  MonitoringStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub "${TemplateBaseURL}monitoring.yaml"
 
 Outputs:
   StaticSiteBucketName:
