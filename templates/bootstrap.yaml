@@ -83,4 +83,4 @@ Outputs:
   ArtifactBucketName:
     Value: !Ref ArtifactBucket
     Export:
-      Name: devops-bootstrap-stack-ArtifactBucketName
+      Name: "devops-bootstrap-stack-artifacts"
