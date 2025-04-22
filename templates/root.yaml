@@ -25,6 +25,10 @@ Parameters:
     Type: String
     Description: Full S3 URL to templates folder (e.g., https://bucket.s3.amazonaws.com/templates/)
 
+  devopsBootstrapStackArtifactBucketName:
+    Type: String
+    Description: The artifact bucket name from the bootstrap stack
+
 Resources:
   # Static Site Bucket
   StaticSiteBucket:
@@ -59,14 +63,14 @@ Resources:
   SQSStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub "https://${Fn::ImportValue: 'devops-bootstrap-stack-ArtifactBucketName'}.s3.${AWS::Region}.amazonaws.com/templates/sqs.yaml"
+      TemplateURL: !Sub "https://${devopsBootstrapStackArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/sqs.yaml"
 
   # === Lambda Stack (depends on SQS export) ===
   LambdaStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: [SQSStack]
     Properties:
-      TemplateURL: !Sub "https://${Fn::ImportValue: 'devops-bootstrap-stack-ArtifactBucketName'}.s3.${AWS::Region}.amazonaws.com/templates/lambda.yaml"
+      TemplateURL: !Sub "https://${devopsBootstrapStackArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/lambda.yaml"
       Parameters:
         ArtifactBucketName: !Ref ArtifactBucketName
 
@@ -75,21 +79,21 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: [LambdaStack]
     Properties:
-      TemplateURL: !Sub "https://${Fn::ImportValue: 'devops-bootstrap-stack-ArtifactBucketName'}.s3.${AWS::Region}.amazonaws.com/templates/eventbridge.yaml"
+      TemplateURL: !Sub "https://${devopsBootstrapStackArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/eventbridge.yaml"
 
   # === Monitoring Stack ===
   MonitoringStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: [LambdaStack]
     Properties:
-      TemplateURL: !Sub "https://${Fn::ImportValue: 'devops-bootstrap-stack-ArtifactBucketName'}.s3.${AWS::Region}.amazonaws.com/templates/monitoring.yaml"
+      TemplateURL: !Sub "https://${devopsBootstrapStackArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/monitoring.yaml"
 
   # === Pipeline Stack ===
   PipelineStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: [StaticSiteBucket, StaticSiteBucketPolicy]  # Ensure StaticSiteBucket and its Policy are created first
     Properties:
-      TemplateURL: !Sub "https://${Fn::ImportValue: 'devops-bootstrap-stack-ArtifactBucketName'}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
+      TemplateURL: !Sub "https://${devopsBootstrapStackArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
       Parameters:
         GitHubRepo: !Ref GitHubRepo
         GitHubOwner: !Ref GitHubOwner
