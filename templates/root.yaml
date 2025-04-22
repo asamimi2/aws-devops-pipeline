@@ -19,6 +19,7 @@ Parameters:
     Type: String
     NoEcho: true
     Description: GitHub personal access token stored in Secrets Manager
+    Default: "{{resolve:secretsmanager:GitHubToken:SecretString}}"
 
   TemplateBaseURL:
     Type: String
