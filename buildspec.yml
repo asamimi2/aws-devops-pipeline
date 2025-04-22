@@ -13,16 +13,10 @@ phases:
       - zip -r artifacts/dlqProcessor.zip lambda/dlqProcessor
       - zip -r artifacts/cleanup.zip lambda/cleanup
 
-      - echo "Fetching artifact bucket name from bootstrap stack..."
-      - export ARTIFACT_BUCKET=$(aws cloudformation describe-stacks \
-          --stack-name devops-bootstrap-stack \
-          --query "Stacks[0].Outputs[?OutputKey=='ArtifactBucketName'].OutputValue" \
-          --output text)
-
-      - echo "Uploading Lambda zips to S3..."
+      - echo "Uploading Lambda artifacts to S3..."
       - aws s3 cp artifacts/ s3://$ARTIFACT_BUCKET/lambda/ --recursive
 
-      - echo "Uploading templates to S3..."
+      - echo "Uploading CloudFormation templates to S3..."
       - aws s3 cp templates/ s3://$ARTIFACT_BUCKET/templates/ --recursive --acl public-read
 
       - echo "Deploying root stack..."
