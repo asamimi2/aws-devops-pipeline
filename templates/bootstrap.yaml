@@ -52,6 +52,109 @@ Resources:
       Artifacts:
         Type: NO_ARTIFACTS
 
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Root stack to orchestrate all sub-stacks and create required S3 buckets
+
+Parameters:
+  GitHubRepo:
+    Type: String
+    Description: GitHub repository name (e.g., aws-devops-pipeline)
+
+  GitHubOwner:
+    Type: String
+    Description: GitHub username or organization
+
+  GitHubBranch:
+    Type: String
+    Default: main
+    Description: Branch to monitor
+
+  GitHubOAuthToken:
+    Type: String
+    NoEcho: true
+    Description: GitHub personal access token stored in Secrets Manager
+
+  TemplateBaseURL:
+    Type: String
+    Description: Full S3 URL to templates folder (e.g., https://bucket.s3.amazonaws.com/templates/)
+
+Resources:
+  # Static Site Bucket
+  StaticSiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::StackName}-frontend"
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: false
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: false
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+
+  StaticSiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref StaticSiteBucket
+      PolicyDocument:
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action: s3:GetObject
+            Resource: !Sub "arn:aws:s3:::${StaticSiteBucket}/*"
+
+  # === SQS Stack (must come first to export UserQueueUrl) ===
+  SQSStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${Fn::ImportValue: 'devops-bootstrap-stack-ArtifactBucketName'}.s3.${AWS::Region}.amazonaws.com/templates/sqs.yaml"
+
+  # === Lambda Stack (depends on SQS export) ===
+  LambdaStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: [SQSStack]
+    Properties:
+      TemplateURL: !Sub "https://${Fn::ImportValue: 'devops-bootstrap-stack-ArtifactBucketName'}.s3.${AWS::Region}.amazonaws.com/templates/lambda.yaml"
+      Parameters:
+        ArtifactBucketName: !Ref ArtifactBucketName
+
+  # === EventBridge Stack ===
+  EventBridgeStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: [LambdaStack]
+    Properties:
+      TemplateURL: !Sub "https://${Fn::ImportValue: 'devops-bootstrap-stack-ArtifactBucketName'}.s3.${AWS::Region}.amazonaws.com/templates/eventbridge.yaml"
+
+  # === Monitoring Stack ===
+  MonitoringStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: [LambdaStack]
+    Properties:
+      TemplateURL: !Sub "https://${Fn::ImportValue: 'devops-bootstrap-stack-ArtifactBucketName'}.s3.${AWS::Region}.amazonaws.com/templates/monitoring.yaml"
+
+  # === Pipeline Stack ===
+  PipelineStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: [StaticSiteBucket, StaticSiteBucketPolicy]  # Ensure StaticSiteBucket and its Policy are created first
+    Properties:
+      TemplateURL: !Sub "https://${Fn::ImportValue: 'devops-bootstrap-stack-ArtifactBucketName'}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
+      Parameters:
+        GitHubRepo: !Ref GitHubRepo
+        GitHubOwner: !Ref GitHubOwner
+        GitHubBranch: !Ref GitHubBranch
+        GitHubOAuthToken: !Ref GitHubOAuthToken
+        ArtifactBucketName: !Ref ArtifactBucketName
+        StaticSiteBucketName: !Ref StaticSiteBucket
+
 Outputs:
-  ArtifactBucketName:
-    Value: !Ref ArtifactBucket
+  StaticSiteBucketName:
+    Description: Name of the static site bucket
+    Value: !Ref StaticSiteBucket
+    Export:
+      Name: StaticSiteBucketName
+
