@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Bootstrap CodeBuild project to deploy CI/CD pipeline from buildspec
+
+Parameters:
+  ArtifactBucketName:
+    Type: String
+  GitHubRepo:
+    Type: String
+  GitHubOwner:
+    Type: String
+  GitHubBranch:
+    Type: String
+  GitHubOAuthToken:
+    Type: String
+    NoEcho: true
+
+Resources:
+  BootstrapBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: BootstrapCodeBuildRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: BootstrapBuildPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:*
+                  - cloudformation:*
+                  - secretsmanager:GetSecretValue
+                Resource: "*"
+
+  InitialDeploymentProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: InitialDeploymentProject
+      ServiceRole: !GetAtt BootstrapBuildRole.Arn
+      Source:
+        Type: GITHUB
+        Location: !Sub https://github.com/${GitHubOwner}/${GitHubRepo}.git
+        BuildSpec: buildspec.yaml
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:7.0
+        Type: LINUX_CONTAINER
+        EnvironmentVariables:
+          - Name: ARTIFACT_BUCKET
+            Value: !Ref ArtifactBucketName
+      TimeoutInMinutes: 10
