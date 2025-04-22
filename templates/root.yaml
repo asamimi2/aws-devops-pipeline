@@ -25,7 +25,7 @@ Parameters:
     Type: String
     Description: Full S3 URL to templates folder (e.g., https://bucket.s3.amazonaws.com/templates/)
 
-  ArtifactBucketName:  # Make sure this is defined as a parameter
+  ArtifactBucketName:
     Type: String
     Description: The name of the artifact bucket created in the bootstrap stack.
 
@@ -104,11 +104,11 @@ Resources:
         GitHubBranch: !Ref GitHubBranch
         GitHubOAuthToken: !Ref GitHubOAuthToken
         ArtifactBucketName: !Ref ArtifactBucketName
-        StaticSiteBucketName: !Ref StaticSiteBucket
+        StaticSiteBucketName: !ImportValue !Sub "${AWS::StackName}-StaticSiteBucketName"  # Correctly referencing the exported value
 
 Outputs:
   StaticSiteBucketName:
     Description: Name of the static site bucket
     Value: !Ref StaticSiteBucket
     Export:
-      Name: StaticSiteBucketName
+      Name: !Sub "${AWS::StackName}-StaticSiteBucketName"  # Exported with unique name
