@@ -104,11 +104,11 @@ Resources:
         GitHubBranch: !Ref GitHubBranch
         GitHubOAuthToken: !Ref GitHubOAuthToken
         ArtifactBucketName: !Ref ArtifactBucketName
-        StaticSiteBucketName: !ImportValue !Sub "${AWS::StackName}-StaticSiteBucketName"  # Corrected the import value reference
+        StaticSiteBucketName: !ImportValue "devops-root-stack-frontend"  # Fixed this line to import the correct value
 
 Outputs:
   StaticSiteBucketName:
     Description: Name of the static site bucket
     Value: !Ref StaticSiteBucket
     Export:
-      Name: "devops-root-stack-frontend"  # This export name should match what you use later
+      Name: "devops-root-stack-frontend"  # This export name matches the import reference in the PipelineStack
