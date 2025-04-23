@@ -23,6 +23,11 @@ Parameters:
     Description: GitHub personal access token stored in Secrets Manager
     Default: "{{resolve:secretsmanager:GitHubToken:SecretString}}"
 
+  ArtifactBucketName:
+    Type: String
+    Description: Name of the artifact bucket exported from the bootstrap stack
+    Default: !ImportValue ArtifactBucketName
+
 Resources:
   # Static Site Bucket
   StaticSiteBucket:
@@ -59,28 +64,28 @@ Resources:
   SQSStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/sqs.yaml"
+      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/sqs.yaml"
 
   # === Lambda Stack ===
   LambdaStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: [SQSStack]
     Properties:
-      TemplateURL: "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/lambda.yaml"
+      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/lambda.yaml"
 
   # === EventBridge Stack ===
   EventBridgeStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: [LambdaStack]
     Properties:
-      TemplateURL: "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/eventbridge.yaml"
+      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/eventbridge.yaml"
 
   # === Monitoring Stack ===
   MonitoringStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: [LambdaStack]
     Properties:
-      TemplateURL: "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/monitoring.yaml"
+      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/monitoring.yaml"
 
   # === Pipeline Stack ===
   PipelineStack:
@@ -89,13 +94,13 @@ Resources:
       - StaticSiteBucket
       - SQSStack
     Properties:
-      TemplateURL: "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
+      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
       Parameters:
         GitHubRepo: !Ref GitHubRepo
         GitHubOwner: !Ref GitHubOwner
         GitHubBranch: !Ref GitHubBranch
         GitHubOAuthToken: !Ref GitHubOAuthToken
-        ArtifactBucketName: !ImportValue ArtifactBucketName
+        ArtifactBucketName: !Ref ArtifactBucketName
         StaticSiteBucketName: !Ref StaticSiteBucket
 
 Outputs:
