@@ -32,6 +32,7 @@ Parameters:
     Type: String
     Description: The name of the artifact bucket created in the bootstrap stack.
     # Default: devops-bootstrap-stack-artifacts
+    Default: !ImportValue ArtifactBucketName
   
   StaticSiteBucketName:
     Type: String
