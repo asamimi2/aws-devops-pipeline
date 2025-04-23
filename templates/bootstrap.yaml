@@ -44,6 +44,8 @@ Resources:
                   - cloudformation:DescribeStacks
                   - cloudformation:UpdateStack
                   - cloudformation:ListStackResources
+                  # CloudFormation ValidateTemplate permission
+                  - cloudformation:ValidateTemplate  # <-- Add this line
                   # Lambda permissions for invocation and management
                   - lambda:CreateFunction
                   - lambda:InvokeFunction
