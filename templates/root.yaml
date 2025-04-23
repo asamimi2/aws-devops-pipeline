@@ -26,7 +26,6 @@ Parameters:
   ArtifactBucketName:
     Type: String
     Description: Name of the artifact bucket exported from the bootstrap stack
-    Default: !ImportValue ArtifactBucketName
 
 Resources:
   # Static Site Bucket
