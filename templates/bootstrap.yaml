@@ -79,6 +79,10 @@ Resources:
                   - codepipeline:GetPipelineState
                   - codepipeline:PutActionRevision
                   - codepipeline:GetPipeline
+                  # Secrets Manager permissions to manage secrets
+                  - secretsmanager:GetSecretValue
+                  # IAM permissions for role management
+                  - iam:DeleteRolePolicy
                 Resource: "*"
 
   # Create the CodeBuild Project
