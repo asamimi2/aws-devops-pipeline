@@ -32,7 +32,11 @@ Parameters:
     Type: String
     Description: The name of the artifact bucket created in the bootstrap stack.
     Default: "devops-bootstrap-stack-artifacts"
-
+  
+  StaticSiteBucketName:
+    Type: String
+    Default: !ImportValue devops-root-stack-frontend
+  
 Resources:
   # Static Site Bucket
   StaticSiteBucket:
@@ -94,17 +98,28 @@ Resources:
 
   # === Pipeline Stack ===
 PipelineStack:
-  Type: AWS::CloudFormation::Stack
-  DependsOn: StaticSiteBucket
+  Type: AWS::CodePipeline::Pipeline
   Properties:
-    TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
-    Parameters:
-      GitHubRepo: !Ref GitHubRepo
-      GitHubOwner: !Ref GitHubOwner
-      GitHubBranch: !Ref GitHubBranch
-      GitHubOAuthToken: !Ref GitHubOAuthToken
-      ArtifactBucketName: !Ref ArtifactBucketName
-      StaticSiteBucketName: !ImportValue devops-root-stack-frontend
+    Name: YourPipelineName
+    RoleArn: arn:aws:iam::ACCOUNT_ID:role/YourCodePipelineRole
+    ArtifactStore:
+      Type: S3
+      Location: your-artifact-bucket
+    Stages:
+      - Name: Source
+        Actions:
+          - Name: SourceAction
+            ActionTypeId:
+              Category: Source
+              Owner: AWS
+              Provider: GitHub
+              Version: 1
+            OutputArtifacts:
+              - Name: SourceOutput
+            Configuration:
+              Repo: aws-devops-pipeline
+              Branch: main
+              OAuthToken: !Ref GitHubOAuthToken
 
 Outputs:
   StaticSiteBucketName:
