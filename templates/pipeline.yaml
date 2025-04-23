@@ -50,9 +50,15 @@ Resources:
                   - s3:*
                   - codebuild:*
                   - cloudformation:*
+                  - lambda:InvokeFunction
                   - iam:PassRole
-                  - codebuild:BatchGetBuilds
-                  - codebuild:StartBuild
+                  - iam:ListRoles
+                  - codepipeline:StartPipelineExecution
+                  - codepipeline:GetPipelineState
+                  - codepipeline:PutActionRevision
+                  - codepipeline:GetPipeline
+                  - cloudformation:DescribeStacks
+                  - cloudformation:UpdateStack
                 Resource: "*"
 
   # CodeBuild Project for building the app
