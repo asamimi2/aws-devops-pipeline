@@ -44,25 +44,28 @@ Resources:
 
 
   # Create the CodeBuild Project
-  BootstrapBuildProject:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Name: BootstrapBuildProject
-      ServiceRole: !GetAtt BootstrapCodeBuildRole.Arn
-      Environment:
-        ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/standard:7.0
-        Type: LINUX_CONTAINER
-        EnvironmentVariables:
-          - Name: ARTIFACT_BUCKET
-            Value: !Ref ArtifactBucket
-      Source:
-        Type: GITHUB
-        Location: https://github.com/asamimi2/aws-devops-pipeline
-        GitCloneDepth: 1
-        BuildSpec: buildspec.yml
-      Artifacts:
-        Type: NO_ARTIFACTS
+BootstrapBuildProject:
+  Type: AWS::CodeBuild::Project
+  Properties:
+    Name: BootstrapBuildProject
+    ServiceRole: !GetAtt BootstrapCodeBuildRole.Arn
+    Environment:
+      ComputeType: BUILD_GENERAL1_SMALL
+      Image: aws/codebuild/standard:7.0
+      Type: LINUX_CONTAINER
+      EnvironmentVariables:
+        - Name: ARTIFACT_BUCKET
+          Value: !Ref ArtifactBucket  # Ensure this refers to the S3 bucket created
+        - Name: ArtifactBucketName
+          Value: !ImportValue devops-bootstrap-stack-ArtifactBucketName  # Reference the exported ArtifactBucketName
+    Source:
+      Type: GITHUB
+      Location: https://github.com/asamimi2/aws-devops-pipeline
+      GitCloneDepth: 1
+      BuildSpec: buildspec.yml
+    Artifacts:
+      Type: NO_ARTIFACTS
+
 
   # S3 Bucket Policy to allow public read access for all objects in Artifact Bucket
   ArtifactBucketPolicy:

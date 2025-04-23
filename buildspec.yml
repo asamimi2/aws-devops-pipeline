@@ -31,3 +31,7 @@ phases:
               GitHubOAuthToken='{{resolve:secretsmanager:GitHubToken:SecretString}}' \
               ArtifactBucketName=$ArtifactBucketName \
               TemplateBaseURL=https://$ArtifactBucketName.s3.amazonaws.com/templates/
+
+artifacts:
+  files:
+    - '**/*'
