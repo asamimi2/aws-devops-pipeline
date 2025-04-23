@@ -6,7 +6,8 @@ phases:
       python: 3.12
     commands:
       - echo "Setting environment variable ARTIFACT_BUCKET..."
-      - export ARTIFACT_BUCKET=$ArtifactBucketName  # Ensure this is set correctly
+      - echo "ARTIFACT_BUCKET=$ARTIFACT_BUCKET"  # Use the environment variable passed from CloudFormation
+      - export ARTIFACT_BUCKET=$ARTIFACT_BUCKET  # Ensure this is set correctly
 
   build:
     commands:
