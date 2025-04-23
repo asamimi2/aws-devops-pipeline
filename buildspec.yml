@@ -5,7 +5,7 @@ phases:
     runtime-versions:
       python: 3.12
     commands:
-      - echo "Setting environment variable ARTIFACT_BUCKET..."
+      - echo "Setting environment variable $ARTIFACT_BUCKET..."
       - echo "ARTIFACT_BUCKET is set to: $ARTIFACT_BUCKET"
       - export ARTIFACT_BUCKET=$ARTIFACT_BUCKET
 
