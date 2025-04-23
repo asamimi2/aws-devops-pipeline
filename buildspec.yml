@@ -1,45 +1,106 @@
-version: 0.2
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Root stack to orchestrate all sub-stacks and create required S3 buckets
 
-phases:
-  install:
-    runtime-versions:
-      python: 3.12
-    commands:
-      - echo "Setting environment variable ARTIFACT_BUCKET..."
-      - export ARTIFACT_BUCKET=$ARTIFACT_BUCKET  # ARTIFACT_BUCKET should already be set by CodeBuild
-      
-  build:
-    commands:
-      - echo "Zipping Lambda functions..."
-      - mkdir -p artifacts
-      
-      # Check if required directories exist
-      - |
-        for dir in lambda/submitData lambda/dlqProcessor lambda/cleanup; do
-          if [ ! -d "$dir" ]; then
-            echo "Directory $dir does not exist"; exit 1;
-          fi
-        done
+Parameters:
+  GitHubRepo:
+    Type: String
+    Description: GitHub repository name (e.g., aws-devops-pipeline)
+    Default: "aws-devops-pipeline"
 
-      # Zip the Lambda functions
-      - zip -r artifacts/submitData.zip lambda/submitData
-      - zip -r artifacts/dlqProcessor.zip lambda/dlqProcessor
-      - zip -r artifacts/cleanup.zip lambda/cleanup
+  GitHubOwner:
+    Type: String
+    Description: GitHub username or organization
+    Default: "asamimi2"
 
-      - echo "Uploading Lambda artifacts to S3..."
-      - aws s3 cp artifacts/ s3://$ARTIFACT_BUCKET/lambda/ --recursive
-      - aws s3 ls s3://$ARTIFACT_BUCKET/lambda/
+  GitHubBranch:
+    Type: String
+    Default: main
+    Description: Branch to monitor
 
-      - echo "Uploading CloudFormation templates to S3..."
-      - aws s3 cp templates/ s3://$ARTIFACT_BUCKET/templates/ --recursive
-      - aws s3 ls s3://$ARTIFACT_BUCKET/templates/
+  GitHubOAuthToken:
+    Type: String
+    NoEcho: true
+    Description: GitHub personal access token stored in Secrets Manager
+    Default: "{{resolve:secretsmanager:GitHubToken:SecretString}}"
 
-      - echo "Validating root stack template..."
-      - aws cloudformation validate-template --template-body file://templates/root.yaml
+Resources:
+  # Static Site Bucket
+  StaticSiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: "devops-root-stack-frontend"
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: false
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: false
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
 
-      - echo "Deploying root stack..."
-      - aws cloudformation deploy --template-file templates/root.yaml --stack-name devops-root-stack --capabilities CAPABILITY_NAMED_IAM
+  # Static Site Bucket Policy
+  StaticSiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    DependsOn: StaticSiteBucket
+    Properties:
+      Bucket: !Ref StaticSiteBucket
+      PolicyDocument:
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action: s3:GetObject
+            Resource: !Sub "arn:aws:s3:::${StaticSiteBucket}/*"
 
-artifacts:
-  files:
-    - '**/*'
+  # === SQS Stack ===
+  SQSStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/sqs.yaml"
+
+  # === Lambda Stack ===
+  LambdaStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: [SQSStack]
+    Properties:
+      TemplateURL: "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/lambda.yaml"
+
+  # === EventBridge Stack ===
+  EventBridgeStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: [LambdaStack]
+    Properties:
+      TemplateURL: "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/eventbridge.yaml"
+
+  # === Monitoring Stack ===
+  MonitoringStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: [LambdaStack]
+    Properties:
+      TemplateURL: "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/monitoring.yaml"
+
+  # === Pipeline Stack ===
+  PipelineStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: 
+      - StaticSiteBucket
+      - SQSStack
+    Properties:
+      TemplateURL: "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
+      Parameters:
+        GitHubRepo: !Ref GitHubRepo
+        GitHubOwner: !Ref GitHubOwner
+        GitHubBranch: !Ref GitHubBranch
+        GitHubOAuthToken: !Ref GitHubOAuthToken
+        ArtifactBucketName: !ImportValue ArtifactBucketName
+        StaticSiteBucketName: !Ref StaticSiteBucket
+
+Outputs:
+  StaticSiteBucketName:
+    Description: Name of the static site bucket
+    Value: !Ref StaticSiteBucket
+    Export:
+      Name: StaticSiteBucketName
