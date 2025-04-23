@@ -23,20 +23,14 @@ Parameters:
     Description: GitHub personal access token stored in Secrets Manager
     Default: "{{resolve:secretsmanager:GitHubToken:SecretString}}"
 
-  TemplateBaseURL:
-    Type: String
-    Description: Full S3 URL to templates folder (e.g., https://bucket.s3.amazonaws.com/templates/)
-    Default: !Sub "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/"
-
   ArtifactBucketName:
     Type: String
     Description: The name of the artifact bucket created in the bootstrap stack.
-    Default: devops-bootstrap-stack-artifacts
-  
+
   StaticSiteBucketName:
     Type: String
     Default: devops-root-stack-frontend
-  
+
 Resources:
   # Static Site Bucket
   StaticSiteBucket:
@@ -58,7 +52,7 @@ Resources:
   # Static Site Bucket Policy
   StaticSiteBucketPolicy:
     Type: AWS::S3::BucketPolicy
-    DependsOn: StaticSiteBucket  # Ensure this waits for the bucket to be created
+    DependsOn: StaticSiteBucket
     Properties:
       Bucket: !Ref StaticSiteBucket
       PolicyDocument:
@@ -69,18 +63,18 @@ Resources:
             Action: s3:GetObject
             Resource: !Sub "arn:aws:s3:::${StaticSiteBucket}/*"
 
-  # === SQS Stack (must come first to export UserQueueUrl) ===
+  # === SQS Stack ===
   SQSStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub "${TemplateBaseURL}sqs.yaml"
+      TemplateURL: !Sub "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/sqs.yaml"
 
-  # === Lambda Stack (depends on SQS export) ===
+  # === Lambda Stack ===
   LambdaStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: [SQSStack]
     Properties:
-      TemplateURL: !Sub "${TemplateBaseURL}lambda.yaml"
+      TemplateURL: !Sub "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/lambda.yaml"
       Parameters:
         ArtifactBucketName: !Ref ArtifactBucketName
 
@@ -89,14 +83,14 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: [LambdaStack]
     Properties:
-      TemplateURL: !Sub "${TemplateBaseURL}eventbridge.yaml"
+      TemplateURL: !Sub "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/eventbridge.yaml"
 
   # === Monitoring Stack ===
   MonitoringStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: [LambdaStack]
     Properties:
-      TemplateURL: !Sub "${TemplateBaseURL}monitoring.yaml"
+      TemplateURL: !Sub "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/monitoring.yaml"
 
   # === Pipeline Stack ===
   PipelineStack:
@@ -105,7 +99,7 @@ Resources:
       - StaticSiteBucket
       - SQSStack
     Properties:
-      TemplateURL: !Sub "${TemplateBaseURL}pipeline.yaml"
+      TemplateURL: !Sub "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
       Parameters:
         GitHubRepo: !Ref GitHubRepo
         GitHubOwner: !Ref GitHubOwner
