@@ -23,14 +23,6 @@ Parameters:
     Description: GitHub personal access token stored in Secrets Manager
     Default: "{{resolve:secretsmanager:GitHubToken:SecretString}}"
 
-  ArtifactBucketName:
-    Type: String
-    Description: The name of the artifact bucket created in the bootstrap stack.
-
-  StaticSiteBucketName:
-    Type: String
-    Default: devops-root-stack-frontend
-
 Resources:
   # Static Site Bucket
   StaticSiteBucket:
@@ -76,7 +68,7 @@ Resources:
     Properties:
       TemplateURL: !Sub "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/lambda.yaml"
       Parameters:
-        ArtifactBucketName: !Ref ArtifactBucketName
+        ArtifactBucketName: !ImportValue ArtifactBucketName
 
   # === EventBridge Stack ===
   EventBridgeStack:
@@ -105,8 +97,8 @@ Resources:
         GitHubOwner: !Ref GitHubOwner
         GitHubBranch: !Ref GitHubBranch
         GitHubOAuthToken: !Ref GitHubOAuthToken
-        ArtifactBucketName: !Ref ArtifactBucketName
-        StaticSiteBucketName: !Ref StaticSiteBucketName
+        ArtifactBucketName: !ImportValue ArtifactBucketName
+        StaticSiteBucketName: !Ref StaticSiteBucket
 
 Outputs:
   StaticSiteBucketName:
