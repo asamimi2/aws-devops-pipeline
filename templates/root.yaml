@@ -31,7 +31,7 @@ Parameters:
   ArtifactBucketName:
     Type: String
     Description: The name of the artifact bucket created in the bootstrap stack.
-    Default: devops-bootstrap-stack-artifacts
+    # Default: devops-bootstrap-stack-artifacts
   
   StaticSiteBucketName:
     Type: String
@@ -107,7 +107,7 @@ Resources:
         GitHubOwner: !Ref GitHubOwner
         GitHubBranch: !Ref GitHubBranch
         GitHubOAuthToken: !Ref GitHubOAuthToken
-        ArtifactBucketName: !Ref ArtifactBucketName
+        ArtifactBucketName: !ImportValue ArtifactBucketName
         StaticSiteBucketName: !Ref StaticSiteBucketName
 
 Outputs:
