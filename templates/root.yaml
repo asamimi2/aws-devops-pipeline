@@ -94,7 +94,9 @@ Resources:
   # === Pipeline Stack ===
   PipelineStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: SQSStack
+    DependsOn: 
+      - SQSStack
+      - StaticSiteBucket
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
       Parameters:
