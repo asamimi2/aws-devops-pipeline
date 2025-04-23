@@ -24,7 +24,7 @@ phases:
       - aws s3 cp templates/ s3://$ARTIFACT_BUCKET/templates/ --recursive
 
       - echo "Deploying root stack..."
-      - aws cloudformation deploy --template-file templates/root.yaml --stack-name devops-root-stack --capabilities CAPABILITY_NAMED_IAM --parameter-overrides GitHubRepo=aws-devops-pipeline GitHubOwner=asamimi2 GitHubBranch=main GitHubOAuthToken='{{resolve:secretsmanager:GitHubToken:SecretString}}' ArtifactBucketName=$ARTIFACT_BUCKET TemplateBaseURL=https://$ARTIFACT_BUCKET.s3.amazonaws.com/templates/
+      - aws cloudformation deploy --template-file templates/root.yaml --stack-name devops-root-stack --capabilities CAPABILITY_NAMED_IAM
 
 artifacts:
   files:
