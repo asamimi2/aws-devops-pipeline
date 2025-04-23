@@ -108,7 +108,7 @@ Resources:
         GitHubBranch: !Ref GitHubBranch
         GitHubOAuthToken: !Ref GitHubOAuthToken
         ArtifactBucketName: !Ref ArtifactBucketName
-        StaticSiteBucketName: !Ref StaticSiteBucketName
+        StaticSiteBucketName: !ImportValue StaticSiteBucketName
 
 Outputs:
   StaticSiteBucketName:
