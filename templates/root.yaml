@@ -98,28 +98,9 @@ Resources:
 
   # === Pipeline Stack ===
 PipelineStack:
-  Type: AWS::CodePipeline::Pipeline
-  Properties:
-    Name: YourPipelineName
-    RoleArn: arn:aws:iam::ACCOUNT_ID:role/YourCodePipelineRole
-    ArtifactStore:
-      Type: S3
-      Location: ${ArtifactBucketName}
-    Stages:
-      - Name: Source
-        Actions:
-          - Name: SourceAction
-            ActionTypeId:
-              Category: Source
-              Owner: AWS
-              Provider: GitHub
-              Version: 1
-            OutputArtifacts:
-              - Name: SourceOutput
-            Configuration:
-              Repo: aws-devops-pipeline
-              Branch: main
-              OAuthToken: !Ref GitHubOAuthToken
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
 
 Outputs:
   StaticSiteBucketName:
