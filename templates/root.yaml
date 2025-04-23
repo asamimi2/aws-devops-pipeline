@@ -104,7 +104,7 @@ PipelineStack:
     RoleArn: arn:aws:iam::ACCOUNT_ID:role/YourCodePipelineRole
     ArtifactStore:
       Type: S3
-      Location: your-artifact-bucket
+      Location: ${ArtifactBucketName}
     Stages:
       - Name: Source
         Actions:
