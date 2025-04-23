@@ -1,6 +1,29 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: CodePipeline for CI/CD deployment of serverless app
 
+Parameters:
+  GitHubRepo:
+    Type: String
+    Description: GitHub repository name (e.g., aws-devops-pipeline)
+
+  GitHubOwner:
+    Type: String
+    Description: GitHub username or organization
+
+  GitHubBranch:
+    Type: String
+    Default: main
+    Description: Branch to monitor
+
+  GitHubOAuthToken:
+    Type: String
+    NoEcho: true
+    Description: GitHub personal access token stored in Secrets Manager
+
+  ArtifactBucketName:
+    Type: String
+    Description: The name of the artifact bucket
+
 Resources:
   CodePipelineServiceRole:
     Type: AWS::IAM::Role
@@ -23,6 +46,8 @@ Resources:
                   - codebuild:*
                   - cloudformation:*
                   - iam:PassRole
+                  - codebuild:BatchGetBuilds
+                  - codebuild:StartBuild
                 Resource: "*"
 
   Pipeline:
@@ -31,7 +56,7 @@ Resources:
       RoleArn: !GetAtt CodePipelineServiceRole.Arn
       ArtifactStore:
         Type: S3
-        Location: !ImportValue ArtifactBucketName
+        Location: !Ref ArtifactBucketName
       Stages:
         - Name: Source
           Actions:
