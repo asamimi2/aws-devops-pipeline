@@ -87,7 +87,6 @@ Resources:
             Resource: !Sub "arn:aws:s3:::${ArtifactBucket}/*"
 
 Outputs:
-  # Export the ArtifactBucketName so it can be referenced by the root stack
   ArtifactBucketName:
     Value: !Ref ArtifactBucket
     Export:

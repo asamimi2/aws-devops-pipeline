@@ -6,15 +6,22 @@ phases:
       python: 3.12
     commands:
       - echo "Setting environment variable ARTIFACT_BUCKET..."
-      - echo "ARTIFACT_BUCKET is set to: $ARTIFACT_BUCKET"
-
+      - export ARTIFACT_BUCKET=$ARTIFACT_BUCKET  # ARTIFACT_BUCKET should already be set by CodeBuild
+      
   build:
     commands:
       - echo "Zipping Lambda functions..."
       - mkdir -p artifacts
-      - if [ ! -d "lambda/submitData" ]; then echo "Directory lambda/submitData does not exist"; exit 1; fi
-      - if [ ! -d "lambda/dlqProcessor" ]; then echo "Directory lambda/dlqProcessor does not exist"; exit 1; fi
-      - if [ ! -d "lambda/cleanup" ]; then echo "Directory lambda/cleanup does not exist"; exit 1; fi
+      
+      # Check if required directories exist
+      - |
+        for dir in lambda/submitData lambda/dlqProcessor lambda/cleanup; do
+          if [ ! -d "$dir" ]; then
+            echo "Directory $dir does not exist"; exit 1;
+          fi
+        done
+
+      # Zip the Lambda functions
       - zip -r artifacts/submitData.zip lambda/submitData
       - zip -r artifacts/dlqProcessor.zip lambda/dlqProcessor
       - zip -r artifacts/cleanup.zip lambda/cleanup
