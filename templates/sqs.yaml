@@ -1,112 +1,22 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Root stack to orchestrate all sub-stacks and create required S3 buckets
-
-Parameters:
-  GitHubRepo:
-    Type: String
-    Description: GitHub repository name (e.g., aws-devops-pipeline)
-    Default: "aws-devops-pipeline"
-
-  GitHubOwner:
-    Type: String
-    Description: GitHub username or organization
-    Default: "asamimi2"
-
-  GitHubBranch:
-    Type: String
-    Default: main
-    Description: Branch to monitor
-
-  GitHubOAuthToken:
-    Type: String
-    NoEcho: true
-    Description: GitHub personal access token stored in Secrets Manager
-    Default: "{{resolve:secretsmanager:GitHubToken:SecretString}}"
-
-  TemplateBaseURL:
-    Type: String
-    Description: Full S3 URL to templates folder
-    Default: "https://devops-bootstrap-stack-artifacts.s3.us-east-2.amazonaws.com/templates/"
-
-  ArtifactBucketName:
-    Type: String
-    Description: The name of the artifact bucket created in the bootstrap stack.
-    Default: devops-bootstrap-stack-artifacts
-  
-  StaticSiteBucketName:
-    Type: String
-    Default: devops-root-stack-frontend
+Description: SQS Stack to create a Simple Queue Service (SQS) Queue
 
 Resources:
-  StaticSiteBucket:
-    Type: AWS::S3::Bucket
+  MyQueue:
+    Type: AWS::SQS::Queue
     Properties:
-      BucketName: !Ref StaticSiteBucketName
-      WebsiteConfiguration:
-        IndexDocument: index.html
-        ErrorDocument: index.html
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: false
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: false
-      OwnershipControls:
-        Rules:
-          - ObjectOwnership: BucketOwnerEnforced
-
-  StaticSiteBucketPolicy:
-    Type: AWS::S3::BucketPolicy
+      QueueName: devops-sqs-queue
+      VisibilityTimeout: 30
+      MessageRetentionPeriod: 86400  # 1 day in seconds
+      DelaySeconds: 0
+      FifoQueue: false  # Set to true if you want a FIFO queue
+      RedrivePolicy: 
+        deadLetterTargetArn: !GetAtt MyDeadLetterQueue.Arn
+        maxReceiveCount: 5  # Messages that are received and not deleted will be moved to DLQ after 5 attempts
+      
+  MyDeadLetterQueue:
+    Type: AWS::SQS::Queue
     Properties:
-      Bucket: !Ref StaticSiteBucket
-      PolicyDocument:
-        Statement:
-          - Sid: PublicReadGetObject
-            Effect: Allow
-            Principal: "*"
-            Action: s3:GetObject
-            Resource: !Sub "arn:aws:s3:::${StaticSiteBucket}/*"
-
-  SQSStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/sqs.yaml"
-
-  LambdaStack:
-    Type: AWS::CloudFormation::Stack
-    DependsOn: SQSStack
-    Properties:
-      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/lambda.yaml"
-      Parameters:
-        ArtifactBucketName: !Ref ArtifactBucketName
-
-  EventBridgeStack:
-    Type: AWS::CloudFormation::Stack
-    DependsOn: LambdaStack
-    Properties:
-      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/eventbridge.yaml"
-
-  MonitoringStack:
-    Type: AWS::CloudFormation::Stack
-    DependsOn: LambdaStack
-    Properties:
-      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/monitoring.yaml"
-
-  PipelineStack:
-    Type: AWS::CloudFormation::Stack
-    DependsOn: StaticSiteBucket
-    Properties:
-      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
-      Parameters:
-        GitHubRepo: !Ref GitHubRepo
-        GitHubOwner: !Ref GitHubOwner
-        GitHubBranch: !Ref GitHubBranch
-        GitHubOAuthToken: !Ref GitHubOAuthToken
-        ArtifactBucketName: !Ref ArtifactBucketName
-        StaticSiteBucketName: !Ref StaticSiteBucketName
-
-Outputs:
-  StaticSiteBucketName:
-    Description: Name of the static site bucket
-    Value: !Ref StaticSiteBucket
-    Export:
-      Name: StaticSiteBucketName
+      QueueName: devops-sqs-dlq
+      VisibilityTimeout: 30
+      MessageRetentionPeriod: 1209600  # 14 days in seconds
