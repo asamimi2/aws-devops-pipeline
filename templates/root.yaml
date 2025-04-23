@@ -26,7 +26,7 @@ Parameters:
   TemplateBaseURL:
     Type: String
     Description: Full S3 URL to templates folder (e.g., https://bucket.s3.amazonaws.com/templates/)
-    Default: "https://devops-bootstrap-stack-artifacts.s3.us-east-2.amazonaws.com/templates/"
+    Default: !Sub "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/"
 
   ArtifactBucketName:
     Type: String
@@ -73,14 +73,14 @@ Resources:
   SQSStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/sqs.yaml"
+      TemplateURL: !Sub "${TemplateBaseURL}sqs.yaml"
 
   # === Lambda Stack (depends on SQS export) ===
   LambdaStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: [SQSStack]
     Properties:
-      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/lambda.yaml"
+      TemplateURL: !Sub "${TemplateBaseURL}lambda.yaml"
       Parameters:
         ArtifactBucketName: !Ref ArtifactBucketName
 
@@ -89,28 +89,30 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: [LambdaStack]
     Properties:
-      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/eventbridge.yaml"
+      TemplateURL: !Sub "${TemplateBaseURL}eventbridge.yaml"
 
   # === Monitoring Stack ===
   MonitoringStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: [LambdaStack]
     Properties:
-      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/monitoring.yaml"
+      TemplateURL: !Sub "${TemplateBaseURL}monitoring.yaml"
 
   # === Pipeline Stack ===
   PipelineStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: StaticSiteBucket
+    DependsOn: 
+      - StaticSiteBucket
+      - SQSStack
     Properties:
-      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
+      TemplateURL: !Sub "${TemplateBaseURL}pipeline.yaml"
       Parameters:
         GitHubRepo: !Ref GitHubRepo
         GitHubOwner: !Ref GitHubOwner
         GitHubBranch: !Ref GitHubBranch
         GitHubOAuthToken: !Ref GitHubOAuthToken
         ArtifactBucketName: !Ref ArtifactBucketName
-        StaticSiteBucketName: !ImportValue StaticSiteBucketName
+        StaticSiteBucketName: !Ref StaticSiteBucketName
 
 Outputs:
   StaticSiteBucketName:

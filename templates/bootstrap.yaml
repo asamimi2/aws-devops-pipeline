@@ -91,4 +91,4 @@ Outputs:
   ArtifactBucketName:
     Value: !Ref ArtifactBucket
     Export:
-      Name: "ArtifactBucketName"
+      Name: ArtifactBucketName
