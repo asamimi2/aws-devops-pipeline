@@ -24,6 +24,10 @@ Parameters:
     Type: String
     Description: The name of the artifact bucket
 
+  StaticSiteBucketName:
+    Type: String
+    Description: The name of the static website S3 bucket
+
 Resources:
   CodePipelineServiceRole:
     Type: AWS::IAM::Role
@@ -87,3 +91,16 @@ Resources:
                 - Name: BuildOutput
               Configuration:
                 ProjectName: !Ref CodeBuildProject
+        - Name: DeployStaticWebsite
+          Actions:
+            - Name: Deploy_Static_Website
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: S3
+                Version: "1"
+              InputArtifacts:
+                - Name: BuildOutput
+              Configuration:
+                BucketName: !Ref StaticSiteBucketName
+                Extract: "true"
