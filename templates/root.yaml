@@ -104,7 +104,7 @@ Resources:
         GitHubBranch: !Ref GitHubBranch
         GitHubOAuthToken: !Ref GitHubOAuthToken
         ArtifactBucketName: !Ref ArtifactBucketName
-        StaticSiteBucketName: !ImportValue "devops-root-stack-frontend"  # Fixed this line to import the correct value
+        StaticSiteBucketName: !ImportValue "devops-root-stack-frontend"  # Correct reference to the export
 
 Outputs:
   StaticSiteBucketName:
