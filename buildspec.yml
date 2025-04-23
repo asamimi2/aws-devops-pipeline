@@ -14,10 +14,10 @@ phases:
       - zip -r artifacts/cleanup.zip lambda/cleanup
 
       - echo "Uploading Lambda artifacts to S3..."
-      - aws s3 cp artifacts/ s3://$ARTIFACT_BUCKET/lambda/ --recursive
+      - aws s3 cp artifacts/ s3://$ArtifactBucketName/lambda/ --recursive
 
       - echo "Uploading CloudFormation templates to S3..."
-      - aws s3 cp templates/ s3://$ARTIFACT_BUCKET/templates/ --recursive
+      - aws s3 cp templates/ s3://$ArtifactBucketName/templates/ --recursive
 
       - echo "Deploying root stack..."
       - aws cloudformation deploy \
@@ -29,8 +29,8 @@ phases:
               GitHubOwner=asamimi2 \
               GitHubBranch=main \
               GitHubOAuthToken='{{resolve:secretsmanager:GitHubToken:SecretString}}' \
-              ArtifactBucketName=$ARTIFACT_BUCKET \
-              TemplateBaseURL=https://$ARTIFACT_BUCKET.s3.amazonaws.com/templates/
+              ArtifactBucketName=$ArtifactBucketName \
+              TemplateBaseURL=https://$ArtifactBucketName.s3.amazonaws.com/templates/
 
 artifacts:
   files:
