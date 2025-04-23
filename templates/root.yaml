@@ -55,8 +55,10 @@ Resources:
         Rules:
           - ObjectOwnership: BucketOwnerEnforced
 
+  # Static Site Bucket Policy
   StaticSiteBucketPolicy:
     Type: AWS::S3::BucketPolicy
+    DependsOn: StaticSiteBucket  # Ensure this waits for the bucket to be created
     Properties:
       Bucket: !Ref StaticSiteBucket
       PolicyDocument:
