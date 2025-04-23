@@ -115,4 +115,4 @@ Outputs:
     Description: Name of the static site bucket
     Value: !Ref StaticSiteBucket
     Export:
-      Name: devops-root-stack-frontend
+      Name: StaticSiteBucketName
