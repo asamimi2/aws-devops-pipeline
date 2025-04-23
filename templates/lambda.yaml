@@ -10,6 +10,10 @@ Parameters:
     Type: String
     Description: The name of the static website S3 bucket (for deployment)
 
+  UserQueueUrl:
+    Type: String
+    Description: The SQS Queue URL for the Lambda functions
+
 Resources:
 
   # Lambda Execution Role
@@ -56,7 +60,7 @@ Resources:
       Timeout: 10
       Environment:
         Variables:
-          QUEUE_URL: !ImportValue UserQueueUrl
+          QUEUE_URL: !ImportValue UserQueueUrl  # Attach UserQueueUrl from the SQS stack
           BUCKET_NAME: !Ref StaticSiteBucketName  # Attach StaticSiteBucketName from the root stack
 
   # DLQ Processor Lambda Function

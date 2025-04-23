@@ -86,6 +86,7 @@ Resources:
                   - iam:GetRole
                   - iam:GetRolePolicy
                   - iam:CreateRole
+                  - iam:DeleteRole
                   - iam:AttachRolePolicy
                   - iam:PassRole
                 Resource: "*"
