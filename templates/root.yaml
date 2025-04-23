@@ -26,6 +26,7 @@ Parameters:
   ArtifactBucketName:
     Type: String
     Description: Name of the artifact bucket exported from the bootstrap stack
+    Default: "devops-bootstrap-stack-artifacts"
 
 Resources:
   # Static Site Bucket
