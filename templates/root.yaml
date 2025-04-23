@@ -93,22 +93,22 @@ Resources:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/monitoring.yaml"
 
   # === Pipeline Stack ===
-  PipelineStack:
-    Type: AWS::CloudFormation::Stack
-    DependsOn: [StaticSiteBucket, StaticSiteBucketPolicy]  # Ensure StaticSiteBucket and its Policy are created first
-    Properties:
-      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
-      Parameters:
-        GitHubRepo: !Ref GitHubRepo
-        GitHubOwner: !Ref GitHubOwner
-        GitHubBranch: !Ref GitHubBranch
-        GitHubOAuthToken: !Ref GitHubOAuthToken
-        ArtifactBucketName: !Ref ArtifactBucketName
-        StaticSiteBucketName: !ImportValue "devops-root-stack-frontend"  # Correct reference to the export
+PipelineStack:
+  Type: AWS::CloudFormation::Stack
+  DependsOn: StaticSiteBucket
+  Properties:
+    TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
+    Parameters:
+      GitHubRepo: !Ref GitHubRepo
+      GitHubOwner: !Ref GitHubOwner
+      GitHubBranch: !Ref GitHubBranch
+      GitHubOAuthToken: !Ref GitHubOAuthToken
+      ArtifactBucketName: !Ref ArtifactBucketName
+      StaticSiteBucketName: !ImportValue devops-root-stack-frontend
 
 Outputs:
   StaticSiteBucketName:
     Description: Name of the static site bucket
     Value: !Ref StaticSiteBucket
     Export:
-      Name: "devops-root-stack-frontend"  # This export name matches the import reference in the PipelineStack
+      Name: devops-root-stack-frontend
