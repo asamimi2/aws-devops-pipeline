@@ -76,6 +76,7 @@ Resources:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/lambda.yaml"
       Parameters:
         ArtifactBucketName: !ImportValue ArtifactBucketName
+        StaticSiteBucketName: !Ref StaticSiteBucket
 
   # === EventBridge Stack ===
   EventBridgeStack:
