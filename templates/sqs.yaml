@@ -2,7 +2,6 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: SQS queue and Dead Letter Queue for message processing
 
 Resources:
-
   # IAM Role for CloudFormation to create SQS queues
   SQSStackRole:
     Type: AWS::IAM::Role
@@ -50,7 +49,6 @@ Resources:
       VisibilityTimeout: 60
 
 Outputs:
-
   UserQueueUrl:
     Description: URL of the primary user data SQS queue
     Value: !Ref UserDataQueue
