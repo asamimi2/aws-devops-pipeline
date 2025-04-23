@@ -5,12 +5,12 @@ Parameters:
   GitHubRepo:
     Type: String
     Description: GitHub repository name (e.g., aws-devops-pipeline)
-    Default: "aws-devops-pipeline"  # Default value for GitHub Repo
+    Default: "aws-devops-pipeline"
 
   GitHubOwner:
     Type: String
     Description: GitHub username or organization
-    Default: "asamimi2"  # Default value for GitHub Owner
+    Default: "asamimi2"
 
   GitHubBranch:
     Type: String
@@ -31,14 +31,14 @@ Parameters:
   ArtifactBucketName:
     Type: String
     Description: The name of the artifact bucket created in the bootstrap stack.
-    Default: "devops-bootstrap-stack-artifacts"  # Default value for ArtifactBucketName
+    Default: "devops-bootstrap-stack-artifacts"
 
 Resources:
   # Static Site Bucket
   StaticSiteBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "${AWS::StackName}-frontend"
+      BucketName: "devops-root-stack-frontend"
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: index.html
@@ -95,7 +95,7 @@ Resources:
   # === Pipeline Stack ===
   PipelineStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: [StaticSiteBucket, StaticSiteBucketPolicy]  # Ensure StaticSiteBucket and its Policy are created first
+    DependsOn: [StaticSiteBucket, StaticSiteBucketPolicy]
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
       Parameters:
@@ -104,11 +104,11 @@ Resources:
         GitHubBranch: !Ref GitHubBranch
         GitHubOAuthToken: !Ref GitHubOAuthToken
         ArtifactBucketName: !Ref ArtifactBucketName
-        StaticSiteBucketName: !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:output/${AWS::StackName}-StaticSiteBucketName"
+        StaticSiteBucketName: !ImportValue !Sub "${AWS::StackName}-StaticSiteBucketName"
 
 Outputs:
   StaticSiteBucketName:
     Description: Name of the static site bucket
     Value: !Ref StaticSiteBucket
     Export:
-      Name: !Sub "${AWS::StackName}-frontend"
+      Name: "devops-root-stack-frontend"
