@@ -35,7 +35,7 @@ Parameters:
   
   StaticSiteBucketName:
     Type: String
-    Default: !ImportValue devops-root-stack-frontend
+    Default: devops-root-stack-frontend
   
 Resources:
   # Static Site Bucket
