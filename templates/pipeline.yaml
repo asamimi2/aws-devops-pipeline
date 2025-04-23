@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CodePipeline for CI/CD deployment of serverless app
+Description: Full CI/CD Pipeline for Serverless App Deployment
 
 Parameters:
   GitHubRepo:
@@ -13,7 +13,7 @@ Parameters:
   GitHubBranch:
     Type: String
     Default: main
-    Description: Branch to monitor
+    Description: Branch to monitor for changes
 
   GitHubOAuthToken:
     Type: String
@@ -22,13 +22,14 @@ Parameters:
 
   ArtifactBucketName:
     Type: String
-    Description: The name of the artifact bucket
+    Description: Name of the artifact bucket (created in the bootstrap stack)
 
   StaticSiteBucketName:
     Type: String
-    Description: The name of the static website S3 bucket
+    Description: The name of the static website S3 bucket (for deployment)
 
 Resources:
+  # IAM Role for CodePipeline to interact with other services
   CodePipelineServiceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -54,6 +55,34 @@ Resources:
                   - codebuild:StartBuild
                 Resource: "*"
 
+  # CodeBuild Project for building the app
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: CodeBuildProject
+      Description: CodeBuild Project for Building the App
+      ServiceRole: !GetAtt CodePipelineServiceRole.Arn
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:7.0
+        Type: LINUX_CONTAINER
+        EnvironmentVariables:
+          - Name: ARTIFACT_BUCKET
+            Value: !Ref ArtifactBucketName
+          - Name: GitHubOAuthToken
+            Value: !Ref GitHubOAuthToken
+      Source:
+        Type: GITHUB
+        Location: !Sub "https://github.com/${GitHubOwner}/${GitHubRepo}"
+        GitCloneDepth: 1
+        BuildSpec: buildspec.yml
+      Artifacts:
+        Type: S3
+        Location: !Ref ArtifactBucketName
+        Packaging: ZIP
+        Name: build-output
+
+  # CodePipeline Pipeline that orchestrates all stages
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
@@ -104,3 +133,11 @@ Resources:
               Configuration:
                 BucketName: !Ref StaticSiteBucketName
                 Extract: "true"
+
+Outputs:
+  CodeBuildProjectName:
+    Value: !Ref CodeBuildProject
+    Description: The CodeBuild project used for the CI/CD pipeline.
+  PipelineName:
+    Value: !Ref Pipeline
+    Description: The pipeline for the CI/CD process.
