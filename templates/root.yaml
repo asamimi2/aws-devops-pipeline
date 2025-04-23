@@ -31,7 +31,7 @@ Parameters:
   ArtifactBucketName:
     Type: String
     Description: The name of the artifact bucket created in the bootstrap stack.
-    Default: !ImportValue ArtifactBucketName
+    # Default: !ImportValue ArtifactBucketName
   
   StaticSiteBucketName:
     Type: String
