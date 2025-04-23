@@ -3,11 +3,42 @@ Description: SQS queue and Dead Letter Queue for message processing
 
 Resources:
 
+  # IAM Role for CloudFormation to create SQS queues
+  SQSStackRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudformation.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: SQSTemplatePolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:CreateQueue
+                  - sqs:GetQueueUrl
+                  - sqs:SetQueueAttributes
+                  - sqs:SendMessage
+                  - sqs:GetQueueAttributes
+                  - sqs:DeleteMessage
+                  - sqs:ReceiveMessage
+                Resource: "*"
+
+  # Dead Letter Queue (DLQ)
   DeadLetterQueue:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: !Sub "${AWS::StackName}-DLQ"
+      VisibilityTimeout: 60
+      MessageRetentionPeriod: 1209600  # 14 days
 
+  # User Data Queue
   UserDataQueue:
     Type: AWS::SQS::Queue
     Properties:
@@ -15,6 +46,8 @@ Resources:
       RedrivePolicy:
         deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn
         maxReceiveCount: 3
+      MessageRetentionPeriod: 86400  # 1 day
+      VisibilityTimeout: 60
 
 Outputs:
 
