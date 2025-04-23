@@ -25,4 +25,4 @@ Outputs:
     Description: The URL of the SQS queue
     Value: !Ref MyQueue
     Export:
-      Name: UserQueueUrl  # This export name should match the name you're using in the root stack
+      Name: UserQueueUrl

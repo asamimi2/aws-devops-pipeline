@@ -60,7 +60,7 @@ Resources:
       Timeout: 10
       Environment:
         Variables:
-          QUEUE_URL: !ImportValue UserQueueUrl  # Attach UserQueueUrl from the SQS stack
+          QUEUE_URL: !Ref UserQueueUrl  # Attach UserQueueUrl from the SQS stack
           BUCKET_NAME: !Ref StaticSiteBucketName  # Attach StaticSiteBucketName from the root stack
 
   # DLQ Processor Lambda Function
