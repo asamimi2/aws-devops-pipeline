@@ -85,6 +85,9 @@ Resources:
                   - iam:DeleteRolePolicy
                   - iam:GetRole
                   - iam:GetRolePolicy
+                  - iam:CreateRole
+                  - iam:AttachRolePolicy
+                  - iam:PassRole
                 Resource: "*"
 
   # Create the CodeBuild Project
