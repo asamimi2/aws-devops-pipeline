@@ -69,9 +69,11 @@ Resources:
   # === Lambda Stack ===
   LambdaStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: [SQSStack]
+    DependsOn: SQSStack
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/lambda.yaml"
+      Parameters:
+        ArtifactBucketName: !ImportValue ArtifactBucketName
 
   # === EventBridge Stack ===
   EventBridgeStack:

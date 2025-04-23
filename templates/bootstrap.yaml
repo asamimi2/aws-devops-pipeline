@@ -47,6 +47,7 @@ Resources:
                   - sqs:GetQueueAttributes
                   - sqs:DeleteMessage
                   - sqs:ReceiveMessage
+                  - sqs:DeleteQueue
                 Resource: "*"
 
   # Create the CodeBuild Project
