@@ -1,62 +1,112 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: SQS queue and Dead Letter Queue for message processing
+Description: Root stack to orchestrate all sub-stacks and create required S3 buckets
+
+Parameters:
+  GitHubRepo:
+    Type: String
+    Description: GitHub repository name (e.g., aws-devops-pipeline)
+    Default: "aws-devops-pipeline"
+
+  GitHubOwner:
+    Type: String
+    Description: GitHub username or organization
+    Default: "asamimi2"
+
+  GitHubBranch:
+    Type: String
+    Default: main
+    Description: Branch to monitor
+
+  GitHubOAuthToken:
+    Type: String
+    NoEcho: true
+    Description: GitHub personal access token stored in Secrets Manager
+    Default: "{{resolve:secretsmanager:GitHubToken:SecretString}}"
+
+  TemplateBaseURL:
+    Type: String
+    Description: Full S3 URL to templates folder
+    Default: "https://devops-bootstrap-stack-artifacts.s3.us-east-2.amazonaws.com/templates/"
+
+  ArtifactBucketName:
+    Type: String
+    Description: The name of the artifact bucket created in the bootstrap stack.
+    Default: devops-bootstrap-stack-artifacts
+  
+  StaticSiteBucketName:
+    Type: String
+    Default: devops-root-stack-frontend
 
 Resources:
-  # IAM Role for CloudFormation to create SQS queues
-  SQSStackRole:
-    Type: AWS::IAM::Role
+  StaticSiteBucket:
+    Type: AWS::S3::Bucket
     Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
+      BucketName: !Ref StaticSiteBucketName
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: false
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: false
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+
+  StaticSiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref StaticSiteBucket
+      PolicyDocument:
         Statement:
-          - Effect: Allow
-            Principal:
-              Service: cloudformation.amazonaws.com
-            Action: sts:AssumeRole
-      Policies:
-        - PolicyName: SQSTemplatePolicy
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - sqs:CreateQueue
-                  - sqs:GetQueueUrl
-                  - sqs:SetQueueAttributes
-                  - sqs:SendMessage
-                  - sqs:GetQueueAttributes
-                  - sqs:DeleteMessage
-                  - sqs:ReceiveMessage
-                Resource: "*"
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action: s3:GetObject
+            Resource: !Sub "arn:aws:s3:::${StaticSiteBucket}/*"
 
-  # Dead Letter Queue (DLQ)
-  DeadLetterQueue:
-    Type: AWS::SQS::Queue
+  SQSStack:
+    Type: AWS::CloudFormation::Stack
     Properties:
-      QueueName: !Sub "${AWS::StackName}-DLQ"
-      VisibilityTimeout: 60
-      MessageRetentionPeriod: 1209600  # 14 days
+      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/sqs.yaml"
 
-  # User Data Queue
-  UserDataQueue:
-    Type: AWS::SQS::Queue
+  LambdaStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: SQSStack
     Properties:
-      QueueName: !Sub "${AWS::StackName}-UserQueue"
-      RedrivePolicy:
-        deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn
-        maxReceiveCount: 3
-      MessageRetentionPeriod: 86400  # 1 day
-      VisibilityTimeout: 60
+      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/lambda.yaml"
+      Parameters:
+        ArtifactBucketName: !Ref ArtifactBucketName
+
+  EventBridgeStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: LambdaStack
+    Properties:
+      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/eventbridge.yaml"
+
+  MonitoringStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: LambdaStack
+    Properties:
+      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/monitoring.yaml"
+
+  PipelineStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: StaticSiteBucket
+    Properties:
+      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
+      Parameters:
+        GitHubRepo: !Ref GitHubRepo
+        GitHubOwner: !Ref GitHubOwner
+        GitHubBranch: !Ref GitHubBranch
+        GitHubOAuthToken: !Ref GitHubOAuthToken
+        ArtifactBucketName: !Ref ArtifactBucketName
+        StaticSiteBucketName: !Ref StaticSiteBucketName
 
 Outputs:
-  UserQueueUrl:
-    Description: URL of the primary user data SQS queue
-    Value: !Ref UserDataQueue
+  StaticSiteBucketName:
+    Description: Name of the static site bucket
+    Value: !Ref StaticSiteBucket
     Export:
-      Name: UserQueueUrl
-
-  DLQUrl:
-    Description: URL of the dead-letter queue
-    Value: !Ref DeadLetterQueue
-    Export:
-      Name: DLQUrl
+      Name: StaticSiteBucketName

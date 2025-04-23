@@ -1,23 +1,24 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: EventBridge rule for scheduled cleanup tasks
+Description: EventBridge setup for event-driven architecture
 
 Resources:
+  EventBus:
+    Type: AWS::Events::EventBus
+    Properties:
+      Name: !Sub "${AWS::StackName}-event-bus"
 
-  DailyCleanupRule:
+  EventRule:
     Type: AWS::Events::Rule
     Properties:
-      Name: DailyCleanupSchedule
-      Description: Run cleanup Lambda function once a day
-      ScheduleExpression: rate(1 day)
-      State: ENABLED
+      Name: !Sub "${AWS::StackName}-event-rule"
+      EventPattern:
+        source:
+          - "aws.s3"
       Targets:
-        - Id: CleanupLambda
-          Arn: !ImportValue CleanupFunctionArn
+        - Arn: !GetAtt ProcessDataLambda.Arn
+          Id: "ProcessDataLambdaTarget"
 
-  PermissionForEventsToInvokeLambda:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !ImportValue CleanupFunctionArn
-      Action: lambda:InvokeFunction
-      Principal: events.amazonaws.com
-      SourceArn: !GetAtt DailyCleanupRule.Arn
+Outputs:
+  EventBusArn:
+    Description: ARN of the EventBridge EventBus
+    Value: !GetAtt EventBus.Arn

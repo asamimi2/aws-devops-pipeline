@@ -1,27 +1,10 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: CodePipeline for CI/CD deployment of serverless app
 
-Parameters:
-  GitHubRepo:
-    Type: String
-  GitHubOwner:
-    Type: String
-  GitHubBranch:
-    Type: String
-  GitHubOAuthToken:
-    Type: String
-    NoEcho: true
-  ArtifactBucketName:
-    Type: String
-  StaticSiteBucketName:
-    Type: String
-
 Resources:
-
   CodePipelineServiceRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: CodePipelineServiceRole
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -41,51 +24,6 @@ Resources:
                   - cloudformation:*
                   - iam:PassRole
                 Resource: "*"
-
-  CodeBuildServiceRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: CodeBuildServiceRole
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: codebuild.amazonaws.com
-            Action: sts:AssumeRole
-      Policies:
-        - PolicyName: CodeBuildPolicy
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:*
-                  - cloudformation:*
-                  - logs:*
-                  - lambda:*
-                  - iam:PassRole
-                Resource: "*"
-
-  CodeBuildProject:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Name: ServerlessPipelineBuild
-      ServiceRole: !GetAtt CodeBuildServiceRole.Arn
-      Source:
-        Type: CODEPIPELINE
-      Artifacts:
-        Type: CODEPIPELINE
-      Environment:
-        ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/standard:7.0
-        Type: LINUX_CONTAINER
-        EnvironmentVariables:
-          - Name: ARTIFACT_BUCKET
-            Value: !ImportValue ArtifactBucketName
-          - Name: STATIC_BUCKET
-            Value: !ImportValue StaticSiteBucketName
-      TimeoutInMinutes: 10
 
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
