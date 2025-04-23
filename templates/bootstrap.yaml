@@ -18,29 +18,37 @@ Resources:
         ErrorDocument: index.html
 
   # Create the IAM Role for CodeBuild
-  BootstrapCodeBuildRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: BootstrapCodeBuildRole
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: codebuild.amazonaws.com
-            Action: sts:AssumeRole
-      Policies:
-        - PolicyName: BootstrapCodeBuildPolicy
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:*
-                  - cloudformation:*
-                  - logs:*
-                  - secretsmanager:GetSecretValue
-                Resource: "*"
+BootstrapCodeBuildRole:
+  Type: AWS::IAM::Role
+  Properties:
+    RoleName: BootstrapCodeBuildRole
+    AssumeRolePolicyDocument:
+      Version: "2012-10-17"
+      Statement:
+        - Effect: Allow
+          Principal:
+            Service: codebuild.amazonaws.com
+          Action: sts:AssumeRole
+    Policies:
+      - PolicyName: BootstrapCodeBuildPolicy
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:*
+                - cloudformation:*
+                - logs:*
+                - secretsmanager:GetSecretValue
+                - sqs:CreateQueue  # Add sqs:createqueue permission here
+                - sqs:GetQueueUrl
+                - sqs:SetQueueAttributes
+                - sqs:SendMessage
+                - sqs:GetQueueAttributes
+                - sqs:DeleteMessage
+                - sqs:ReceiveMessage
+              Resource: "*"
+
 
   # Create the CodeBuild Project
   BootstrapBuildProject:
