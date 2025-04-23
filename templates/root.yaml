@@ -59,14 +59,14 @@ Resources:
   SQSStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/sqs.yaml"
+      TemplateURL: !Sub "https://${ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/sqs.yaml"
 
   # === Lambda Stack ===
   LambdaStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: [SQSStack]
     Properties:
-      TemplateURL: !Sub "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/lambda.yaml"
+      TemplateURL: !Sub "https://${ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/lambda.yaml"
       Parameters:
         ArtifactBucketName: !ImportValue ArtifactBucketName
 
@@ -75,14 +75,14 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: [LambdaStack]
     Properties:
-      TemplateURL: !Sub "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/eventbridge.yaml"
+      TemplateURL: !Sub "https://${ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/eventbridge.yaml"
 
   # === Monitoring Stack ===
   MonitoringStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: [LambdaStack]
     Properties:
-      TemplateURL: !Sub "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/monitoring.yaml"
+      TemplateURL: !Sub "https://${ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/monitoring.yaml"
 
   # === Pipeline Stack ===
   PipelineStack:
@@ -91,7 +91,7 @@ Resources:
       - StaticSiteBucket
       - SQSStack
     Properties:
-      TemplateURL: !Sub "https://${!ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
+      TemplateURL: !Sub "https://${ImportValue ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
       Parameters:
         GitHubRepo: !Ref GitHubRepo
         GitHubOwner: !Ref GitHubOwner
