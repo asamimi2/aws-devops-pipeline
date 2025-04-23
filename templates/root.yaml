@@ -95,7 +95,7 @@ Resources:
   # === Pipeline Stack ===
   PipelineStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: [StaticSiteBucket, StaticSiteBucketPolicy]
+    DependsOn: [StaticSiteBucket, StaticSiteBucketPolicy]  # Ensure StaticSiteBucket and its Policy are created first
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
       Parameters:
