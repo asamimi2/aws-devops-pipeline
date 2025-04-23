@@ -111,4 +111,4 @@ Outputs:
     Description: Name of the static site bucket
     Value: !Ref StaticSiteBucket
     Export:
-      Name: !Sub "${AWS::StackName}-StaticSiteBucketName"
+      Name: !Sub "${AWS::StackName}-frontend"
