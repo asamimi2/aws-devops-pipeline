@@ -36,18 +36,44 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
+                  # S3 permissions for artifact storage and template access
                   - s3:*
-                  - cloudformation:*
-                  - logs:*
-                  - secretsmanager:GetSecretValue
+                  # CloudFormation permissions to create, update, and delete stacks
+                  - cloudformation:CreateStack
+                  - cloudformation:DeleteStack
+                  - cloudformation:DescribeStacks
+                  - cloudformation:UpdateStack
+                  - cloudformation:ListStackResources
+                  # Lambda permissions for invocation and management
+                  - lambda:CreateFunction
+                  - lambda:InvokeFunction
+                  - lambda:UpdateFunctionCode
+                  - lambda:DeleteFunction
+                  # SQS permissions to create and manage queues
                   - sqs:CreateQueue
+                  - sqs:DeleteQueue
                   - sqs:GetQueueUrl
                   - sqs:SetQueueAttributes
                   - sqs:SendMessage
                   - sqs:GetQueueAttributes
                   - sqs:DeleteMessage
                   - sqs:ReceiveMessage
-                  - sqs:DeleteQueue
+                  # EventBridge permissions to create and manage rules
+                  - events:PutRule
+                  - events:PutTargets
+                  - events:DescribeRule
+                  - events:DeleteRule
+                  - events:ListTargetsByRule
+                  # Monitoring permissions for CloudWatch and log management
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogStreams
+                  # CodePipeline permissions to start, stop, and manage the pipeline
+                  - codepipeline:StartPipelineExecution
+                  - codepipeline:GetPipelineState
+                  - codepipeline:PutActionRevision
+                  - codepipeline:GetPipeline
                 Resource: "*"
 
   # Create the CodeBuild Project
