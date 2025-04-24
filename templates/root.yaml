@@ -79,7 +79,9 @@ Resources:
   PipelineStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: 
+      - SQSStack
       - StaticSiteStack
+      - LambdaStack
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
       Parameters:
