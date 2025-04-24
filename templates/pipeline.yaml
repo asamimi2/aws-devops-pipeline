@@ -20,10 +20,6 @@ Parameters:
     NoEcho: true
     Description: GitHub personal access token stored in Secrets Manager
 
-  CodePipelineServiceRoleArn:
-    Type: String
-    Description: ARN of the CodePipeline service role.
-
 Resources:
   # CodeBuild Project for building the app
   CodeBuildProject:
@@ -31,7 +27,7 @@ Resources:
     Properties:
       Name: CodeBuildProject
       Description: CodeBuild Project for Building the App
-      ServiceRole: !Ref CodePipelineServiceRoleArn  # Import the role ARN
+      ServiceRole: !ImportValue CodePipelineServiceRoleArn  # Import the role ARN
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:7.0
@@ -56,7 +52,7 @@ Resources:
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
-      RoleArn: !Ref CodePipelineServiceRoleArn  # Import the role ARN
+      RoleArn: !ImportValue CodePipelineServiceRoleArn  # Import the role ARN
       ArtifactStore:
         Type: S3
         Location: !ImportValue ArtifactBucketName

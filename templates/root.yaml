@@ -29,71 +29,12 @@ Parameters:
     Default: "devops-bootstrap-stack-artifacts"
 
 Resources:
-  # Lambda Execution Role
-  LambdaExecutionRole:
-    Type: AWS::IAM::Role
+  # IAM Stack Reference
+  IAMStack:
+    Type: AWS::CloudFormation::Stack
     Properties:
-      RoleName: !Sub "${AWS::StackName}-LambdaExecutionRole"
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
-      Policies:
-        - PolicyName: !Sub "${AWS::StackName}-LambdaPolicy"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogGroup
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                  - sqs:SendMessage
-                  - sqs:ReceiveMessage
-                  - sqs:DeleteMessage
-                  - s3:ListBucket
-                  - s3:DeleteObject
-                  - s3:GetObject
-                Resource: "*"
-
-  # IAM Role for CodePipeline to interact with other services
-  CodePipelineServiceRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub "${AWS::StackName}-CodePipelineServiceRole"
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: codepipeline.amazonaws.com
-            Action: sts:AssumeRole
-      Policies:
-        - PolicyName: !Sub "${AWS::StackName}-CodePipelinePolicy"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:*
-                  - codebuild:*
-                  - cloudformation:*
-                  - lambda:InvokeFunction
-                  - iam:PassRole
-                  - iam:ListRoles
-                  - codepipeline:StartPipelineExecution
-                  - codepipeline:GetPipelineState
-                  - codepipeline:PutActionRevision
-                  - codepipeline:GetPipeline
-                  - cloudformation:DescribeStacks
-                  - cloudformation:UpdateStack
-                  - codebuild:BatchGetBuilds
-                  - codebuild:StartBuild
-                Resource: "*"
-
+      TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/iam.yaml"
+  
   # Static Site Stack Reference
   StaticSiteStack:
     Type: AWS::CloudFormation::Stack
@@ -111,13 +52,11 @@ Resources:
   LambdaStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: 
+      - IAMStack
       - SQSStack
       - StaticSiteStack
-      - LambdaExecutionRole
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/lambda.yaml"
-    Parameters:
-      LambdaExecutionRole: !GetAtt LambdaExecutionRole.Arn
 
   # EventBridge Stack
   EventBridgeStack:
@@ -143,10 +82,10 @@ Resources:
   PipelineStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: 
+      - IAMStack
       - SQSStack
       - StaticSiteStack
       - LambdaStack
-      - CodePipelineServiceRole
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
       Parameters:
@@ -154,4 +93,3 @@ Resources:
         GitHubOwner: !Ref GitHubOwner
         GitHubBranch: !Ref GitHubBranch
         GitHubOAuthToken: !Ref GitHubOAuthToken
-        CodePipelineServiceRole: !GetAtt CodePipelineServiceRole.Arn
