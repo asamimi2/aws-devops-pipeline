@@ -6,7 +6,7 @@ Resources:
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${AWS::StackName}-LambdaExecutionRole"
+      RoleName: !Sub "${AWS::StackName}-LambdaExecutionRole-${Timestamp}"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
