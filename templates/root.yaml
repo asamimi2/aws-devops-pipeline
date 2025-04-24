@@ -117,7 +117,7 @@ Resources:
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/lambda.yaml"
     Parameters:
-      LambdaExecutionRole: !Ref LambdaExecutionRole
+      LambdaExecutionRole: !GetAtt LambdaExecutionRole.Arn
 
   # EventBridge Stack
   EventBridgeStack:
@@ -154,4 +154,4 @@ Resources:
         GitHubOwner: !Ref GitHubOwner
         GitHubBranch: !Ref GitHubBranch
         GitHubOAuthToken: !Ref GitHubOAuthToken
-        CodePipelineServiceRole: !Ref CodePipelineServiceRole
+        CodePipelineServiceRole: !GetAtt CodePipelineServiceRole.Arn
