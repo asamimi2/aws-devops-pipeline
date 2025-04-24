@@ -50,10 +50,6 @@ Resources:
       - StaticSiteStack
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/lambda.yaml"
-      Parameters:
-        ArtifactBucketName: !ImportValue ArtifactBucketName
-        # StaticSiteBucketName: !ImportValue StaticSiteBucket
-        # UserQueueUrl: !ImportValue UserQueueUrl
 
   # EventBridge Stack
   EventBridgeStack:
@@ -89,5 +85,3 @@ Resources:
         GitHubOwner: !Ref GitHubOwner
         GitHubBranch: !Ref GitHubBranch
         GitHubOAuthToken: !Ref GitHubOAuthToken
-        # ArtifactBucketName: !Ref ArtifactBucketName
-        # StaticSiteBucketName: !ImportValue StaticSiteBucket

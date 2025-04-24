@@ -1,19 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Lambda functions and IAM roles
 
-# Parameters:
-#   ArtifactBucketName:
-#     Type: String
-#     Description: Name of the bucket storing Lambda .zip artifacts
-
-#   StaticSiteBucketName:
-#     Type: String
-#     Description: The name of the static website S3 bucket (for deployment)
-
-#   UserQueueUrl:
-#     Type: String
-#     Description: The SQS Queue URL for the Lambda functions
-
 Resources:
   # Lambda Execution Role
   LambdaExecutionRole:
