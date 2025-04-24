@@ -42,7 +42,7 @@ Resources:
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/sqs.yaml"
 
-  # === Lambda Stack ===
+  # Lambda Stack
   LambdaStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: 
@@ -51,11 +51,11 @@ Resources:
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/lambda.yaml"
       Parameters:
-        ArtifactBucketName: !Ref ArtifactBucketName
-        StaticSiteBucketName: !ImportValue StaticSiteBucket
-        UserQueueUrl: !ImportValue UserQueueUrl
+        ArtifactBucketName: !ImportValue ArtifactBucketName
+        # StaticSiteBucketName: !ImportValue StaticSiteBucket
+        # UserQueueUrl: !ImportValue UserQueueUrl
 
-  # === EventBridge Stack ===
+  # EventBridge Stack
   EventBridgeStack:
     Type: AWS::CloudFormation::Stack
     # DependsOn: 
@@ -65,7 +65,7 @@ Resources:
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/eventbridge.yaml"
 
-  # === Monitoring Stack ===
+  # Monitoring Stack
   MonitoringStack:
     Type: AWS::CloudFormation::Stack
     # DependsOn: 
@@ -75,7 +75,7 @@ Resources:
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/monitoring.yaml"
 
-  # === Pipeline Stack ===
+  # Pipeline Stack
   PipelineStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: 
@@ -87,5 +87,5 @@ Resources:
         GitHubOwner: !Ref GitHubOwner
         GitHubBranch: !Ref GitHubBranch
         GitHubOAuthToken: !Ref GitHubOAuthToken
-        ArtifactBucketName: !Ref ArtifactBucketName
-        StaticSiteBucketName: !ImportValue StaticSiteBucket
+        # ArtifactBucketName: !Ref ArtifactBucketName
+        # StaticSiteBucketName: !ImportValue StaticSiteBucket

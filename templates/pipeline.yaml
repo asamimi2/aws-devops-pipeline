@@ -20,13 +20,13 @@ Parameters:
     NoEcho: true
     Description: GitHub personal access token stored in Secrets Manager
 
-  ArtifactBucketName:
-    Type: String
-    Description: Name of the artifact bucket (created in the bootstrap stack)
+  # ArtifactBucketName:
+  #   Type: String
+  #   Description: Name of the artifact bucket (created in the bootstrap stack)
 
-  StaticSiteBucketName:
-    Type: String
-    Description: The name of the static website S3 bucket (for deployment)
+  # StaticSiteBucketName:
+  #   Type: String
+  #   Description: The name of the static website S3 bucket (for deployment)
 
 Resources:
   # IAM Role for CodePipeline to interact with other services
@@ -74,7 +74,7 @@ Resources:
         Type: LINUX_CONTAINER
         EnvironmentVariables:
           - Name: ARTIFACT_BUCKET
-            Value: !Ref ArtifactBucketName
+            Value: !ImportValue ArtifactBucketName
           - Name: GitHubOAuthToken
             Value: !Ref GitHubOAuthToken
       Source:
@@ -84,7 +84,7 @@ Resources:
         BuildSpec: buildspec.yml
       Artifacts:
         Type: S3
-        Location: !Ref ArtifactBucketName
+        Location: !ImportValue ArtifactBucketName
         Packaging: ZIP
         Name: build-output
 
@@ -95,7 +95,7 @@ Resources:
       RoleArn: !GetAtt CodePipelineServiceRole.Arn
       ArtifactStore:
         Type: S3
-        Location: !Ref ArtifactBucketName
+        Location: !ImportValue ArtifactBucketName
       Stages:
         - Name: Source
           Actions:
@@ -137,7 +137,7 @@ Resources:
               InputArtifacts:
                 - Name: BuildOutput
               Configuration:
-                BucketName: !Ref StaticSiteBucketName
+                BucketName: !ImportValue StaticSiteBucketName
                 Extract: "true"
 
 Outputs:

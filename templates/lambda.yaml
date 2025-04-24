@@ -1,18 +1,18 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Lambda functions and IAM roles
 
-Parameters:
-  ArtifactBucketName:
-    Type: String
-    Description: Name of the bucket storing Lambda .zip artifacts
+# Parameters:
+#   ArtifactBucketName:
+#     Type: String
+#     Description: Name of the bucket storing Lambda .zip artifacts
 
-  StaticSiteBucketName:
-    Type: String
-    Description: The name of the static website S3 bucket (for deployment)
+#   StaticSiteBucketName:
+#     Type: String
+#     Description: The name of the static website S3 bucket (for deployment)
 
-  UserQueueUrl:
-    Type: String
-    Description: The SQS Queue URL for the Lambda functions
+#   UserQueueUrl:
+#     Type: String
+#     Description: The SQS Queue URL for the Lambda functions
 
 Resources:
 
@@ -60,8 +60,8 @@ Resources:
       Timeout: 10
       Environment:
         Variables:
-          QUEUE_URL: !Ref UserQueueUrl  # Attach UserQueueUrl from the SQS stack
-          BUCKET_NAME: !Ref StaticSiteBucketName  # Attach StaticSiteBucketName from the root stack
+          QUEUE_URL: !ImportValue UserQueueUrl  # Attach UserQueueUrl from the SQS stack
+          BUCKET_NAME: !ImportValue StaticSiteBucketName  # Attach StaticSiteBucketName from the root stack
 
   # DLQ Processor Lambda Function
   DLQProcessorFunction:
@@ -72,7 +72,7 @@ Resources:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaExecutionRole.Arn
       Code:
-        S3Bucket: !Ref ArtifactBucketName
+        S3Bucket: !ImportValue ArtifactBucketName
         S3Key: lambda/dlqProcessor.zip
       Timeout: 10
 
@@ -85,12 +85,12 @@ Resources:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaExecutionRole.Arn
       Code:
-        S3Bucket: !Ref ArtifactBucketName
+        S3Bucket: !ImportValue ArtifactBucketName
         S3Key: lambda/cleanup.zip
       Timeout: 10
       Environment:
         Variables:
-          BUCKET_NAME: !Ref StaticSiteBucketName  # Attach StaticSiteBucketName from the root stack
+          BUCKET_NAME: !ImportValue StaticSiteBucketName  # Attach StaticSiteBucketName from the root stack
 
 Outputs:
   SubmitDataFunctionArn:
