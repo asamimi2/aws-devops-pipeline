@@ -23,43 +23,36 @@ Parameters:
     Description: GitHub personal access token stored in Secrets Manager
     Default: "{{resolve:secretsmanager:GitHubToken:SecretString}}"
 
+Mappings:
+  BaseTemplateURL:
+    Default:
+      URL: !Join
+        - ""
+        - - "https://"
+          - !ImportValue ArtifactBucketName
+          - ".s3."
+          - !Ref "AWS::Region"
+          - ".amazonaws.com/templates"
+
 Resources:
   # IAM Stack Reference
   IAMStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !ImportValue ArtifactBucketName
-          - ".s3."
-          - !Ref "AWS::Region"
-          - ".amazonaws.com/templates/iam.yaml"
+      TemplateURL: !FindInMap [BaseTemplateURL, Default, URL]/iam.yaml
 
   # Static Site Stack Reference
   StaticSiteStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !ImportValue ArtifactBucketName
-          - ".s3."
-          - !Ref "AWS::Region"
-          - ".amazonaws.com/templates/s3.yaml"
+      TemplateURL: !FindInMap [BaseTemplateURL, Default, URL]/s3.yaml
 
   # SQS Stack
   SQSStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: StaticSiteStack
     Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !ImportValue ArtifactBucketName
-          - ".s3."
-          - !Ref "AWS::Region"
-          - ".amazonaws.com/templates/sqs.yaml"
+      TemplateURL: !FindInMap [BaseTemplateURL, Default, URL]/sqs.yaml
 
   # Lambda Stack
   LambdaStack:
@@ -69,13 +62,7 @@ Resources:
       - SQSStack
       - StaticSiteStack
     Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !ImportValue ArtifactBucketName
-          - ".s3."
-          - !Ref "AWS::Region"
-          - ".amazonaws.com/templates/lambda.yaml"
+      TemplateURL: !FindInMap [BaseTemplateURL, Default, URL]/lambda.yaml
 
   # EventBridge Stack
   EventBridgeStack:
@@ -85,13 +72,7 @@ Resources:
       - StaticSiteStack
       - LambdaStack
     Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !ImportValue ArtifactBucketName
-          - ".s3."
-          - !Ref "AWS::Region"
-          - ".amazonaws.com/templates/eventbridge.yaml"
+      TemplateURL: !FindInMap [BaseTemplateURL, Default, URL]/eventbridge.yaml
 
   # Monitoring Stack
   MonitoringStack:
@@ -101,13 +82,7 @@ Resources:
       - StaticSiteStack
       - LambdaStack
     Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !ImportValue ArtifactBucketName
-          - ".s3."
-          - !Ref "AWS::Region"
-          - ".amazonaws.com/templates/monitoring.yaml"
+      TemplateURL: !FindInMap [BaseTemplateURL, Default, URL]/monitoring.yaml
 
   # Pipeline Stack
   PipelineStack:
@@ -118,13 +93,7 @@ Resources:
       - StaticSiteStack
       - LambdaStack
     Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !ImportValue ArtifactBucketName
-          - ".s3."
-          - !Ref "AWS::Region"
-          - ".amazonaws.com/templates/pipeline.yaml"
+      TemplateURL: !FindInMap [BaseTemplateURL, Default, URL]/pipeline.yaml
       Parameters:
         GitHubRepo: !Ref GitHubRepo
         GitHubOwner: !Ref GitHubOwner
