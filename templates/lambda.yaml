@@ -2,45 +2,14 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Lambda functions and IAM roles
 
 Resources:
-  # Lambda Execution Role
-  LambdaExecutionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub "${AWS::StackName}-LambdaExecutionRole"
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
-      Policies:
-        - PolicyName: !Sub "${AWS::StackName}-LambdaPolicy"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogGroup
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                  - sqs:SendMessage
-                  - sqs:ReceiveMessage
-                  - sqs:DeleteMessage
-                  - s3:ListBucket
-                  - s3:DeleteObject
-                  - s3:GetObject
-                Resource: "*"
-
   # Submit Data Lambda Function
   SubmitDataFunction:
     Type: AWS::Lambda::Function
-    DependsOn: LambdaExecutionRole
     Properties:
       FunctionName: SubmitDataFunction
       Runtime: python3.12
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaExecutionRole.Arn
+      Role: !ImportValue LambdaExecutionRoleArn  # Import the role ARN
       Code:
         S3Bucket: !ImportValue ArtifactBucketName
         S3Key: lambda/submitData.zip
@@ -53,12 +22,11 @@ Resources:
   # DLQ Processor Lambda Function
   DLQProcessorFunction:
     Type: AWS::Lambda::Function
-    DependsOn: LambdaExecutionRole
     Properties:
       FunctionName: DLQProcessorFunction
       Runtime: python3.12
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaExecutionRole.Arn
+      Role: !ImportValue LambdaExecutionRoleArn  # Import the role ARN
       Code:
         S3Bucket: !ImportValue ArtifactBucketName
         S3Key: lambda/dlqProcessor.zip
@@ -67,12 +35,11 @@ Resources:
   # Cleanup Lambda Function
   CleanupFunction:
     Type: AWS::Lambda::Function
-    DependsOn: LambdaExecutionRole
     Properties:
       FunctionName: CleanupFunction
       Runtime: python3.12
       Handler: handler.lambda_handler
-      Role: !GetAtt LambdaExecutionRole.Arn
+      Role: !ImportValue LambdaExecutionRoleArn  # Import the role ARN
       Code:
         S3Bucket: !ImportValue ArtifactBucketName
         S3Key: lambda/cleanup.zip

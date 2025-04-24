@@ -2,7 +2,6 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Bootstrap stack to create artifact bucket and build project
 
 Resources:
-
   # Create the artifact bucket
   ArtifactBucket:
     Type: AWS::S3::Bucket

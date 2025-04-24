@@ -21,48 +21,13 @@ Parameters:
     Description: GitHub personal access token stored in Secrets Manager
 
 Resources:
-  # IAM Role for CodePipeline to interact with other services
-  CodePipelineServiceRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub "${AWS::StackName}-CodePipelineServiceRole"
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: codepipeline.amazonaws.com
-            Action: sts:AssumeRole
-      Policies:
-        - PolicyName: !Sub "${AWS::StackName}-CodePipelinePolicy"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:*
-                  - codebuild:*
-                  - cloudformation:*
-                  - lambda:InvokeFunction
-                  - iam:PassRole
-                  - iam:ListRoles
-                  - codepipeline:StartPipelineExecution
-                  - codepipeline:GetPipelineState
-                  - codepipeline:PutActionRevision
-                  - codepipeline:GetPipeline
-                  - cloudformation:DescribeStacks
-                  - cloudformation:UpdateStack
-                  - codebuild:BatchGetBuilds
-                  - codebuild:StartBuild
-                Resource: "*"
-
   # CodeBuild Project for building the app
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
       Name: CodeBuildProject
       Description: CodeBuild Project for Building the App
-      ServiceRole: !GetAtt CodePipelineServiceRole.Arn
+      ServiceRole: !ImportValue CodePipelineServiceRoleArn  # Import the role ARN
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:7.0
@@ -87,7 +52,7 @@ Resources:
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
-      RoleArn: !GetAtt CodePipelineServiceRole.Arn
+      RoleArn: !ImportValue CodePipelineServiceRoleArn  # Import the role ARN
       ArtifactStore:
         Type: S3
         Location: !ImportValue ArtifactBucketName
