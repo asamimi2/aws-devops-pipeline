@@ -2,18 +2,40 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: EventBridge setup for event-driven architecture
 
 Resources:
+  # EventBus
   EventBus:
     Type: AWS::Events::EventBus
     Properties:
       Name: !Sub "${AWS::StackName}-event-bus"
 
+  ProcessDataLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${AWS::StackName}-ProcessDataLambda"
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        S3Bucket: !ImportValue ArtifactBucketName
+        S3Key: lambda/processData.zip
+      Runtime: python3.12
+      Environment:
+        Variables:
+          QUEUE_URL: !ImportValue UserQueueUrl
+          BUCKET_NAME: !ImportValue StaticSiteBucketName
+
+  # EventBridge Rule
   EventRule:
     Type: AWS::Events::Rule
     Properties:
       Name: !Sub "${AWS::StackName}-event-rule"
+      EventBusName: !Ref EventBus
       EventPattern:
         source:
           - "aws.s3"
+        detail-type:
+          - "AWS API Call via CloudTrail"
+        resources:
+          - !ImportValue StaticSiteBucket
       Targets:
         - Arn: !GetAtt ProcessDataLambda.Arn
           Id: "ProcessDataLambdaTarget"

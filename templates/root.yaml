@@ -58,20 +58,20 @@ Resources:
   # EventBridge Stack
   EventBridgeStack:
     Type: AWS::CloudFormation::Stack
-    # DependsOn: 
-    #   - SQSStack
-    #   - StaticSiteBucket
-    #   - LambdaStack
+    DependsOn: 
+      - SQSStack
+      - StaticSiteBucket
+      - LambdaStack
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/eventbridge.yaml"
 
   # Monitoring Stack
   MonitoringStack:
     Type: AWS::CloudFormation::Stack
-    # DependsOn: 
-    #   - SQSStack
-    #   - StaticSiteBucket
-    #   - LambdaStack
+    DependsOn: 
+      - SQSStack
+      - StaticSiteBucket
+      - LambdaStack
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/monitoring.yaml"
 

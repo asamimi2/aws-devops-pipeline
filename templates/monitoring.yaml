@@ -2,6 +2,14 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Monitoring resources for application
 
 Resources:
+  AlarmNotification:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: Alarm Notification
+      Subscription:
+        - Protocol: email
+          Endpoint: "aarash.samimi@cdw.com"
+
   CloudWatchAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:

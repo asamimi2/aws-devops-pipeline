@@ -15,7 +15,6 @@ Description: Lambda functions and IAM roles
 #     Description: The SQS Queue URL for the Lambda functions
 
 Resources:
-
   # Lambda Execution Role
   LambdaExecutionRole:
     Type: AWS::IAM::Role
