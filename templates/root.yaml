@@ -29,41 +29,16 @@ Parameters:
     Default: "devops-bootstrap-stack-artifacts"
 
 Resources:
-  # Static Site Bucket
-  StaticSiteBucket:
-    Type: AWS::S3::Bucket
+  # Static Site Stack Reference
+  StaticSiteStack:
+    Type: AWS::CloudFormation::Stack
     Properties:
-      BucketName: "devops-root-stack-frontend"
-      WebsiteConfiguration:
-        IndexDocument: index.html
-        ErrorDocument: index.html
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: false
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: false
-      OwnershipControls:
-        Rules:
-          - ObjectOwnership: BucketOwnerEnforced
-
-  # Static Site Bucket Policy
-  StaticSiteBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    DependsOn: StaticSiteBucket
-    Properties:
-      Bucket: !Ref StaticSiteBucket
-      PolicyDocument:
-        Statement:
-          - Sid: PublicReadGetObject
-            Effect: Allow
-            Principal: "*"
-            Action: s3:GetObject
-            Resource: !Sub "arn:aws:s3:::${StaticSiteBucket}/*"
-
-  # === SQS Stack ===
+      TemplateURL: "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/s3.yaml"
+  
+  # SQS Stack
   SQSStack:
     Type: AWS::CloudFormation::Stack
-    # DependsOn: StaticSiteBucket
+    DependsOn: StaticSiteStack
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/sqs.yaml"
 
@@ -71,13 +46,13 @@ Resources:
   LambdaStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: 
-      - SQSStack  # Ensure SQSStack is fully created before LambdaStack
-      - StaticSiteBucket
+      - SQSStack
+      - StaticSiteStack
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/lambda.yaml"
       Parameters:
         ArtifactBucketName: !Ref ArtifactBucketName
-        StaticSiteBucketName: !Ref StaticSiteBucket
+        StaticSiteBucketName: !ImportValue StaticSiteBucket
         UserQueueUrl: !ImportValue UserQueueUrl
 
   # === EventBridge Stack ===
@@ -104,7 +79,7 @@ Resources:
   PipelineStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: 
-      - StaticSiteBucket
+      - StaticSiteStack
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
       Parameters:
@@ -113,11 +88,4 @@ Resources:
         GitHubBranch: !Ref GitHubBranch
         GitHubOAuthToken: !Ref GitHubOAuthToken
         ArtifactBucketName: !Ref ArtifactBucketName
-        StaticSiteBucketName: !Ref StaticSiteBucket
-
-Outputs:
-  StaticSiteBucketName:
-    Description: Name of the static site bucket
-    Value: !Ref StaticSiteBucket
-    Export:
-      Name: StaticSiteBucketName
+        StaticSiteBucketName: !ImportValue StaticSiteBucket
