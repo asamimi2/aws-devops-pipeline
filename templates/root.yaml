@@ -23,10 +23,13 @@ Parameters:
     Description: GitHub personal access token stored in Secrets Manager
     Default: "{{resolve:secretsmanager:GitHubToken:SecretString}}"
 
-Mappings:
+Resources:
+  # Define the base URL once using a pseudo-resource
   BaseTemplateURL:
-    Default:
-      URL: !Join
+    Type: "AWS::NoValue"  # Pseudo-resource
+    Properties: {}
+    Metadata:
+      BaseURL: !Join
         - ""
         - - "https://"
           - !ImportValue ArtifactBucketName
@@ -34,25 +37,24 @@ Mappings:
           - !Ref "AWS::Region"
           - ".amazonaws.com/templates"
 
-Resources:
   # IAM Stack Reference
   IAMStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: "!FindInMap [BaseTemplateURL, Default, URL]/iam.yaml"
+      TemplateURL: !Sub "${BaseTemplateURL}/iam.yaml"
 
   # Static Site Stack Reference
   StaticSiteStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: "!FindInMap [BaseTemplateURL, Default, URL]/s3.yaml"
+      TemplateURL: !Sub "${BaseTemplateURL}/s3.yaml"
 
   # SQS Stack
   SQSStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: StaticSiteStack
     Properties:
-      TemplateURL: "!FindInMap [BaseTemplateURL, Default, URL]/sqs.yaml"
+      TemplateURL: !Sub "${BaseTemplateURL}/sqs.yaml"
 
   # Lambda Stack
   LambdaStack:
@@ -62,7 +64,7 @@ Resources:
       - SQSStack
       - StaticSiteStack
     Properties:
-      TemplateURL: "!FindInMap [BaseTemplateURL, Default, URL]/lambda.yaml"
+      TemplateURL: !Sub "${BaseTemplateURL}/lambda.yaml"
 
   # EventBridge Stack
   EventBridgeStack:
@@ -72,7 +74,7 @@ Resources:
       - StaticSiteStack
       - LambdaStack
     Properties:
-      TemplateURL: "!FindInMap [BaseTemplateURL, Default, URL]/eventbridge.yaml"
+      TemplateURL: !Sub "${BaseTemplateURL}/eventbridge.yaml"
 
   # Monitoring Stack
   MonitoringStack:
@@ -82,7 +84,7 @@ Resources:
       - StaticSiteStack
       - LambdaStack
     Properties:
-      TemplateURL: "!FindInMap [BaseTemplateURL, Default, URL]/monitoring.yaml"
+      TemplateURL: !Sub "${BaseTemplateURL}/monitoring.yaml"
 
   # Pipeline Stack
   PipelineStack:
@@ -93,7 +95,7 @@ Resources:
       - StaticSiteStack
       - LambdaStack
     Properties:
-      TemplateURL: "!FindInMap [BaseTemplateURL, Default, URL]/pipeline.yaml"
+      TemplateURL: !Sub "${BaseTemplateURL}/pipeline.yaml"
       Parameters:
         GitHubRepo: !Ref GitHubRepo
         GitHubOwner: !Ref GitHubOwner
