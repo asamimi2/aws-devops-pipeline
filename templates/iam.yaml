@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Descriptionn: IAM roles and policies for the application
+Description: IAM roles and policies for the application
   
 Resources:
   # Lambda Execution Role
