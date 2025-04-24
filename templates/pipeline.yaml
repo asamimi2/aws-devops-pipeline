@@ -25,7 +25,7 @@ Resources:
   CodePipelineServiceRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${AWS::StackName}-CodePipelineServiceRole"
+      RoleName: !Sub "${AWS::StackName}-CodePipelineServiceRole-${AWS::Timestamp}"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
