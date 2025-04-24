@@ -59,6 +59,8 @@ Resources:
                   - codepipeline:GetPipeline
                   - cloudformation:DescribeStacks
                   - cloudformation:UpdateStack
+                  - codebuild:BatchGetBuilds
+                  - codebuild:StartBuild
                 Resource: "*"
 
   # CodeBuild Project for building the app
@@ -144,6 +146,11 @@ Outputs:
   CodeBuildProjectName:
     Value: !Ref CodeBuildProject
     Description: The CodeBuild project used for the CI/CD pipeline.
+  
   PipelineName:
     Value: !Ref Pipeline
     Description: The pipeline for the CI/CD process.
+  
+  CodePipelineArn:
+    Value: !GetAtt Pipeline.Arn
+    Description: The ARN of the CodePipeline pipeline.
