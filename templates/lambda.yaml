@@ -1,6 +1,11 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Lambda functions and IAM roles
 
+Parameters:
+  LambdaExecutionRoleArn:
+    Type: String
+    Description: ARN of the Lambda Execution Role passed from the root stack
+
 Resources:
   # Submit Data Lambda Function
   SubmitDataFunction:
@@ -9,7 +14,7 @@ Resources:
       FunctionName: SubmitDataFunction
       Runtime: python3.12
       Handler: handler.lambda_handler
-      Role: !ImportValue LambdaExecutionRoleArn  # Import the role ARN
+      Role: !Ref LambdaExecutionRoleArn
       Code:
         S3Bucket: !ImportValue ArtifactBucketName
         S3Key: lambda/submitData.zip
@@ -26,7 +31,7 @@ Resources:
       FunctionName: DLQProcessorFunction
       Runtime: python3.12
       Handler: handler.lambda_handler
-      Role: !ImportValue LambdaExecutionRoleArn  # Import the role ARN
+      Role: !Ref LambdaExecutionRoleArn
       Code:
         S3Bucket: !ImportValue ArtifactBucketName
         S3Key: lambda/dlqProcessor.zip
@@ -39,7 +44,7 @@ Resources:
       FunctionName: CleanupFunction
       Runtime: python3.12
       Handler: handler.lambda_handler
-      Role: !ImportValue LambdaExecutionRoleArn  # Import the role ARN
+      Role: !Ref LambdaExecutionRoleArn
       Code:
         S3Bucket: !ImportValue ArtifactBucketName
         S3Key: lambda/cleanup.zip
