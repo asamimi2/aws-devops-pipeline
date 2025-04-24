@@ -15,7 +15,7 @@ Resources:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
       Policies:
-        - PolicyName: LambdaPolicy
+        - PolicyName: !Sub ${AWS::StackName}-LambdaPolicy"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
