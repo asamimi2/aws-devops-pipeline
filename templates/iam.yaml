@@ -71,7 +71,11 @@ Outputs:
   LambdaExecutionRoleArn:
     Description: ARN of the Lambda execution role
     Value: !GetAtt LambdaExecutionRole.Arn
+    Export:
+      Name: LambdaExecutionRoleArn
 
   CodePipelineServiceRoleArn:
     Description: ARN of the CodePipeline service role
     Value: !GetAtt CodePipelineServiceRole.Arn
+    Export:
+      Name: CodePipelineServiceRoleArn
