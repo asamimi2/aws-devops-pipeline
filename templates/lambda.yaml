@@ -41,7 +41,7 @@ Resources:
       Handler: handler.lambda_handler
       Role: !GetAtt LambdaExecutionRole.Arn
       Code:
-        S3Bucket: !Ref ArtifactBucketName
+        S3Bucket: !ImportValue ArtifactBucketName
         S3Key: lambda/submitData.zip
       Timeout: 10
       Environment:
