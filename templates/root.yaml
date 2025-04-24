@@ -63,7 +63,7 @@ Resources:
   # === SQS Stack ===
   SQSStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: StaticSiteBucket
+    # DependsOn: StaticSiteBucket
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/sqs.yaml"
 
@@ -71,7 +71,7 @@ Resources:
   LambdaStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: 
-      - SQSStack
+      - SQSStack  # Ensure SQSStack is fully created before LambdaStack
       - StaticSiteBucket
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/lambda.yaml"
@@ -83,20 +83,20 @@ Resources:
   # === EventBridge Stack ===
   EventBridgeStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: 
-      - SQSStack
-      - StaticSiteBucket
-      - LambdaStack
+    # DependsOn: 
+    #   - SQSStack
+    #   - StaticSiteBucket
+    #   - LambdaStack
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/eventbridge.yaml"
 
   # === Monitoring Stack ===
   MonitoringStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: 
-      - SQSStack
-      - StaticSiteBucket
-      - LambdaStack
+    # DependsOn: 
+    #   - SQSStack
+    #   - StaticSiteBucket
+    #   - LambdaStack
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/monitoring.yaml"
 
@@ -104,7 +104,6 @@ Resources:
   PipelineStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: 
-      - SQSStack
       - StaticSiteBucket
     Properties:
       TemplateURL: !Sub "https://${ArtifactBucketName}.s3.${AWS::Region}.amazonaws.com/templates/pipeline.yaml"
