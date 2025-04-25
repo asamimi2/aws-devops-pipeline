@@ -120,6 +120,11 @@ Resources:
                   - apigateway:DeleteMethodResponse
                   - apigateway:DeleteIntegration
                   - apigateway:DeleteDeployment
+                  - apigateway:POST
+                  - apigateway:PUT
+                  - apigateway:GET
+                  - apigateway:DELETE
+                  - apigateway:PATCH
                 Resource: "*"
   
   # Create the artifact bucket
