@@ -15,16 +15,16 @@ Resources:
           - ".amazonaws.com/templates/iam.yaml"
 
   # Static Site Stack Reference
-  StaticSiteStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !ImportValue ArtifactBucketName
-          - ".s3."
-          - !Ref "AWS::Region"
-          - ".amazonaws.com/templates/s3.yaml"
+  # StaticSiteStack:
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     TemplateURL: !Join
+  #       - ""
+  #       - - "https://"
+  #         - !ImportValue ArtifactBucketName
+  #         - ".s3."
+  #         - !Ref "AWS::Region"
+  #         - ".amazonaws.com/templates/s3.yaml"
 
   # SQS Stack
   SQSStack:
@@ -45,7 +45,7 @@ Resources:
     DependsOn: 
       - IAMStack
       - SQSStack
-      - StaticSiteStack
+      # - StaticSiteStack
     Properties:
       TemplateURL: !Join
         - ""
@@ -60,7 +60,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: 
       - SQSStack
-      - StaticSiteStack
+      # - StaticSiteStack
       - LambdaStack
     Properties:
       TemplateURL: !Join
@@ -76,7 +76,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: 
       - SQSStack
-      - StaticSiteStack
+      # - StaticSiteStack
       - LambdaStack
     Properties:
       TemplateURL: !Join
@@ -93,7 +93,7 @@ Resources:
     DependsOn: 
       - IAMStack
       - SQSStack
-      - StaticSiteStack
+      # - StaticSiteStack
       - LambdaStack
     Properties:
       TemplateURL: !Join

@@ -2,20 +2,6 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Bootstrap stack to create artifact bucket and build project
 
 Resources:
-  # Create the artifact bucket
-  ArtifactBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: devops-bootstrap-stack-artifacts
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: false
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: false
-      WebsiteConfiguration:
-        IndexDocument: index.html
-        ErrorDocument: index.html
-
   # Create the IAM Role for CodeBuild
   BootstrapCodeBuildRole:
     Type: AWS::IAM::Role
@@ -122,6 +108,64 @@ Resources:
                   - sns:GetTopicAttributes
                   - sns:DeleteTopic
                 Resource: "*"
+  
+  # Create the artifact bucket
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: devops-bootstrap-stack-artifacts
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: false
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: false
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+  # S3 Bucket Policy to allow public read access for all objects in Artifact Bucket
+  ArtifactBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ArtifactBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action: s3:GetObject
+            Resource: !Sub "arn:aws:s3:::${ArtifactBucket}/*"
+ 
+  # Static Site Bucket
+  StaticSiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: "devops-root-stack-frontend"
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: index.html
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: false
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: false
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+  # Static Site Bucket Policy
+  StaticSiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    DependsOn: StaticSiteBucket
+    Properties:
+      Bucket: !Ref StaticSiteBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: "*"
+            Action: s3:GetObject
+            Resource: !Sub "arn:aws:s3:::${StaticSiteBucket}/*"
 
   # Create the CodeBuild Project
   BootstrapBuildProject:
@@ -138,6 +182,8 @@ Resources:
             Value: !Ref ArtifactBucket
           - Name: ArtifactBucketName
             Value: !Ref ArtifactBucket
+          - Name: STATIC_WEBSITE_BUCKET
+            Value: !Ref StaticSiteBucket
       Source:
         Type: GITHUB
         Location: https://github.com/asamimi2/aws-devops-pipeline
@@ -146,22 +192,14 @@ Resources:
       Artifacts:
         Type: NO_ARTIFACTS
 
-  # S3 Bucket Policy to allow public read access for all objects in Artifact Bucket
-  ArtifactBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref ArtifactBucket
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Sid: PublicReadGetObject
-            Effect: Allow
-            Principal: "*"
-            Action: s3:GetObject
-            Resource: !Sub "arn:aws:s3:::${ArtifactBucket}/*"
-
 Outputs:
   ArtifactBucketName:
     Value: !Ref ArtifactBucket
     Export:
       Name: ArtifactBucketName
+  
+  StaticSiteBucketName:
+    Description: Name of the static site bucket
+    Value: !Ref StaticSiteBucket
+    Export:
+      Name: StaticSiteBucketName

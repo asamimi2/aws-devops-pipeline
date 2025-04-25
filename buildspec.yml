@@ -7,7 +7,8 @@ phases:
     commands:
       - echo "Setting environment variable ARTIFACT_BUCKET..."
       - export ARTIFACT_BUCKET=$ARTIFACT_BUCKET  # ARTIFACT_BUCKET should already be set by CodeBuild
-
+      - export STATIC_WEBSITE_BUCKET=$STATIC_WEBSITE_BUCKET  # Set static website bucket variable
+      
   build:
     commands:
       - echo "Zipping Lambda functions..."
@@ -30,10 +31,16 @@ phases:
       - aws s3 cp artifacts/ s3://$ARTIFACT_BUCKET/lambda/ --recursive
       - aws s3 ls s3://$ARTIFACT_BUCKET/lambda/
 
-      # Upload Static Website files
-      - echo "Uploading Static Website Files to S3..."
-      - aws s3 cp static-site/ s3://$STATIC_WEBSITE_BUCKET/ --recursive
-      - aws s3 ls s3://$STATIC_WEBSITE_BUCKET/
+      # Check if the static website bucket exists
+      - |
+        if aws s3 ls s3://$STATIC_WEBSITE_BUCKET/; then
+          echo "Bucket exists, uploading static website content..."
+          # Upload Static Website files including main.js, index.html, etc.
+          aws s3 cp static-website/ s3://$STATIC_WEBSITE_BUCKET/ --recursive
+          aws s3 ls s3://$STATIC_WEBSITE_BUCKET/
+        else
+          echo "Static website bucket does not exist. Skipping upload."
+        fi
 
       - echo "Uploading CloudFormation templates to S3..."
       - aws s3 cp templates/ s3://$ARTIFACT_BUCKET/templates/ --recursive
