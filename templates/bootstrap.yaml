@@ -76,11 +76,14 @@ Resources:
                   - events:DescribeEventBus
                   - events:ListEventBuses
                   - events:CreateEventBus
+                  - events:RemoveTargets
                   # Monitoring permissions for CloudWatch and log management
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                   - logs:DescribeLogStreams
+                  - logs:DeleteLogGroup
+                  - logs:DeleteLogStream
                   # CodePipeline permissions to start, stop, and manage the pipeline
                   - codepipeline:CreatePipeline
                   - codepipeline:DeletePipeline
