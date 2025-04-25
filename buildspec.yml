@@ -13,7 +13,7 @@ phases:
     commands:
       - echo "Zipping Lambda functions..."
       - mkdir -p artifacts
-      
+
       # Check if required directories exist
       - |
         for dir in lambda/submitData lambda/dlqProcessor lambda/cleanup; do
@@ -31,17 +31,12 @@ phases:
       - aws s3 cp artifacts/ s3://$ARTIFACT_BUCKET/lambda/ --recursive
       - aws s3 ls s3://$ARTIFACT_BUCKET/lambda/
 
-      # Check if the static website bucket exists
-      - |
-        if aws s3 ls s3://$STATIC_WEBSITE_BUCKET/; then
-          echo "Bucket exists, uploading static website content..."
-          # Upload Static Website files including main.js, index.html, etc.
-          aws s3 cp static-website/ s3://$STATIC_WEBSITE_BUCKET/ --recursive
-          aws s3 ls s3://$STATIC_WEBSITE_BUCKET/
-        else
-          echo "Static website bucket does not exist. Skipping upload."
-        fi
+      # Upload Static Website files, only the contents from the static-website folder
+      - echo "Uploading Static Website Files to S3..."
+      - aws s3 cp static-website/ s3://$STATIC_WEBSITE_BUCKET/ --recursive --exclude "*.yaml" --exclude "*.yml" --exclude "*.zip"
+      - aws s3 ls s3://$STATIC_WEBSITE_BUCKET/
 
+      # Upload CloudFormation templates to Artifact Bucket
       - echo "Uploading CloudFormation templates to S3..."
       - aws s3 cp templates/ s3://$ARTIFACT_BUCKET/templates/ --recursive
       - aws s3 ls s3://$ARTIFACT_BUCKET/templates/
