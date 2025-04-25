@@ -38,6 +38,8 @@ Resources:
         EnvironmentVariables:
           - Name: ARTIFACT_BUCKET
             Value: !ImportValue ArtifactBucketName
+          - Name: STATIC_WEBSITE_BUCKET
+            Value: !ImportValue StaticSiteBucketName
           - Name: GitHubOAuthToken
             Value: !Ref GitHubOAuthToken
       Source:
