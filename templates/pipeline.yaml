@@ -111,7 +111,7 @@ Outputs:
   PipelineName:
     Value: !Ref Pipeline
     Description: The pipeline for the CI/CD process.
-  
+
   CodePipelineArn:
-    Value: !GetAtt Pipeline.Arn
+    Value: !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:pipeline/${Pipeline}
     Description: The ARN of the CodePipeline pipeline.
