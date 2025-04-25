@@ -46,6 +46,7 @@ Resources:
                   - cloudformation:CreateChangeSet  # <-- Add this line
                   - cloudformation:ExecuteChangeSet # <-- Add this line
                   - cloudformation:DescribeChangeSet # <-- Add this line
+                  - cloudformation:getTemplateSummary # <-- Add this line
                   # CloudFormation ValidateTemplate permission
                   - cloudformation:ValidateTemplate
                   # Lambda permissions for invocation and management
