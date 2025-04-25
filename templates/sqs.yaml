@@ -25,4 +25,4 @@ Outputs:
     Description: The URL of the SQS queue
     Value: !Ref MyQueue
     Export:
-      Name: UserQueueUrl
+      Name: MyQueueUrl
