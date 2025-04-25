@@ -107,6 +107,19 @@ Resources:
                   - sns:SetTopicAttributes
                   - sns:GetTopicAttributes
                   - sns:DeleteTopic
+                  # API Gateway permissions for creating and managing APIs
+                  - apigateway:CreateRestApi
+                  - apigateway:CreateResource
+                  - apigateway:CreateMethod
+                  - apigateway:CreateMethodResponse
+                  - apigateway:CreateIntegration
+                  - apigateway:CreateDeployment
+                  - apigateway:DeleteRestApi
+                  - apigateway:DeleteResource
+                  - apigateway:DeleteMethod
+                  - apigateway:DeleteMethodResponse
+                  - apigateway:DeleteIntegration
+                  - apigateway:DeleteDeployment
                 Resource: "*"
   
   # Create the artifact bucket
