@@ -12,7 +12,7 @@ Resources:
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${StackPrefix}-LambdaExecutionRole"
+      RoleName: !Sub "devops-LambdaExecutionRole"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -21,7 +21,7 @@ Resources:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
       Policies:
-        - PolicyName: !Sub "${StackPrefix}-LambdaPolicy"
+        - PolicyName: !Sub "devops-LambdaPolicy"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -42,7 +42,7 @@ Resources:
   CodePipelineServiceRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${StackPrefix}-CodePipelineServiceRole"
+      RoleName: !Sub "devops-CodePipelineServiceRole"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -51,7 +51,7 @@ Resources:
               Service: codepipeline.amazonaws.com
             Action: sts:AssumeRole
       Policies:
-        - PolicyName: !Sub "${StackPrefix}-CodePipelinePolicy"
+        - PolicyName: !Sub "devops-CodePipelinePolicy"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -79,7 +79,7 @@ Resources:
   CodeBuildServiceRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${StackPrefix}-CodeBuildServiceRole"
+      RoleName: !Sub "devops-CodeBuildServiceRole"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -88,7 +88,7 @@ Resources:
               Service: codebuild.amazonaws.com
             Action: sts:AssumeRole
       Policies:
-        - PolicyName: !Sub "${StackPrefix}-CodeBuildPolicy"
+        - PolicyName: !Sub "devops-CodeBuildPolicy"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:

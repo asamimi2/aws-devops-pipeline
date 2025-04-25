@@ -6,12 +6,12 @@ Resources:
   EventBus:
     Type: AWS::Events::EventBus
     Properties:
-      Name: !Sub "${StackPrefix}-event-bus"
+      Name: !Sub "devops-event-bus"
 
   ProcessDataLambda:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub "${StackPrefix}-ProcessDataLambda"
+      FunctionName: !Sub "devops-ProcessDataLambda"
       Handler: index.handler
       Role: !ImportValue LambdaExecutionRoleArn
       Code:
@@ -27,7 +27,7 @@ Resources:
   EventRule:
     Type: AWS::Events::Rule
     Properties:
-      Name: !Sub "${StackPrefix}-event-rule"
+      Name: !Sub "devops-event-rule"
       EventBusName: !Ref EventBus
       EventPattern:
         source:
