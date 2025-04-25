@@ -29,7 +29,7 @@ Resources:
   # SQS Stack
   SQSStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: StaticSiteStack
+    # DependsOn: StaticSiteStack
     Properties:
       TemplateURL: !Join
         - ""
