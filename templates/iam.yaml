@@ -107,6 +107,10 @@ Resources:
                   - cloudformation:CreateStack
                   - cloudformation:GetTemplateSummary
                   - cloudformation:CreateChangeSet
+                  - cloudformation:DescribeChangeSet
+                  - cloudformation:ExecuteChangeSet
+                  - cloudformation:ListStackResources
+                  - cloudformation:DescribeStackResources
                   # SNS Permissions
                   - sns:*
                   # CodeBuild Permissions
