@@ -2,6 +2,7 @@ import json
 import boto3
 import os
 
+#SubmitData Lambda function to send messages to SQS queue
 sqs = boto3.client('sqs')
 QUEUE_URL = os.environ.get('QUEUE_URL')
 

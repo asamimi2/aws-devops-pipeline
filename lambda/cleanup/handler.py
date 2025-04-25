@@ -2,6 +2,7 @@ import boto3
 import datetime
 import os
 
+#cleanup Lambda function to delete old objects from S3 bucket
 s3 = boto3.client('s3')
 BUCKET_NAME = os.environ.get('BUCKET_NAME')
 MAX_AGE_DAYS = 7

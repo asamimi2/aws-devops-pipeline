@@ -26,3 +26,9 @@ Outputs:
     Value: !Ref MyQueue
     Export:
       Name: MyQueueUrl
+
+  MyDeadLetterQueueUrl:
+    Description: The URL of the Dead Letter Queue (DLQ)
+    Value: !Ref MyDeadLetterQueue
+    Export:
+      Name: MyDeadLetterQueueUrl
