@@ -8,8 +8,8 @@ Resources:
     Properties:
       BucketName: "devops-root-stack-frontend"
       WebsiteConfiguration:
-        IndexDocument: static-site/index.html
-        ErrorDocument: static-site/index.html
+        IndexDocument: index.html
+        ErrorDocument: index.html
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: false
@@ -32,7 +32,7 @@ Resources:
             Effect: Allow
             Principal: "*"
             Action: s3:GetObject
-            Resource: !Sub "arn:aws:s3:::${StaticSiteBucket}/static-site/*"
+            Resource: !Sub "arn:aws:s3:::${StaticSiteBucket}/*"
 
 Outputs:
   StaticSiteBucketName:
