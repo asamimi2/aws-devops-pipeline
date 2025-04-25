@@ -53,6 +53,7 @@ Resources:
                   - lambda:InvokeFunction
                   - lambda:UpdateFunctionCode
                   - lambda:DeleteFunction
+                  - lambda:GetFunction
                   # SQS permissions to create and manage queues
                   - sqs:CreateQueue
                   - sqs:DeleteQueue
