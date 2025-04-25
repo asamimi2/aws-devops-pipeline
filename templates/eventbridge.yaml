@@ -13,7 +13,7 @@ Resources:
     Properties:
       FunctionName: !Sub "${AWS::StackName}-ProcessDataLambda"
       Handler: index.handler
-      Role: !GetAtt LambdaExecutionRole.Arn
+      Role: !ImportValue LambdaExecutionRole.Arn
       Code:
         S3Bucket: !ImportValue ArtifactBucketName
         S3Key: lambda/processData.zip
@@ -37,7 +37,7 @@ Resources:
         resources:
           - !ImportValue StaticSiteBucket
       Targets:
-        - Arn: !GetAtt ProcessDataLambda.Arn
+        - Arn: !ImportValue ProcessDataLambda.Arn
           Id: "ProcessDataLambdaTarget"
 
 Outputs:
