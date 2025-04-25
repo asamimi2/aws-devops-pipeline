@@ -29,7 +29,6 @@ Resources:
   # API Gateway Stack
   APIGatewayStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: 
     Properties:
       TemplateURL: !Join
         - ""
