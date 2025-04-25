@@ -1,12 +1,18 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: IAM roles and policies for the application
 
+Parameters:
+  StackPrefix:
+    Type: String
+    Description: A short prefix for stack resources (used for naming).
+    Default: "devops-root-stack"
+
 Resources:
   # Lambda Execution Role
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${AWS::StackName:0:30}-LambdaExecutionRole"
+      RoleName: !Sub "${StackPrefix}-LambdaExecutionRole"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -15,7 +21,7 @@ Resources:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
       Policies:
-        - PolicyName: !Sub "${AWS::StackName:0:30}-LambdaPolicy"
+        - PolicyName: !Sub "${StackPrefix}-LambdaPolicy"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -36,7 +42,7 @@ Resources:
   CodePipelineServiceRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${AWS::StackName:0:30}-CodePipelineServiceRole"
+      RoleName: !Sub "${StackPrefix}-CodePipelineServiceRole"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -45,7 +51,7 @@ Resources:
               Service: codepipeline.amazonaws.com
             Action: sts:AssumeRole
       Policies:
-        - PolicyName: !Sub "${AWS::StackName:0:30}-CodePipelinePolicy"
+        - PolicyName: !Sub "${StackPrefix}-CodePipelinePolicy"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -73,7 +79,7 @@ Resources:
   CodeBuildServiceRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${AWS::StackName:0:30}-CodeBuildServiceRole"
+      RoleName: !Sub "${StackPrefix}-CodeBuildServiceRole"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -82,7 +88,7 @@ Resources:
               Service: codebuild.amazonaws.com
             Action: sts:AssumeRole
       Policies:
-        - PolicyName: !Sub "${AWS::StackName:0:30}-CodeBuildPolicy"
+        - PolicyName: !Sub "${StackPrefix}-CodeBuildPolicy"
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
