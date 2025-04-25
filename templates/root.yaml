@@ -25,28 +25,11 @@ Resources:
           - ".s3."
           - !Ref "AWS::Region"
           - ".amazonaws.com/templates/sqs.yaml"
-
-  # Lambda Stack
-  LambdaStack:
-    Type: AWS::CloudFormation::Stack
-    DependsOn: 
-      - IAMStack
-      - SQSStack
-    Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !ImportValue ArtifactBucketName
-          - ".s3."
-          - !Ref "AWS::Region"
-          - ".amazonaws.com/templates/lambda.yaml"
   
   # API Gateway Stack
   APIGatewayStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: 
-      - SQSStack
-      - LambdaStack
     Properties:
       TemplateURL: !Join
         - ""
@@ -55,6 +38,22 @@ Resources:
           - ".s3."
           - !Ref "AWS::Region"
           - ".amazonaws.com/templates/api.yaml"
+
+  # Lambda Stack
+  LambdaStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: 
+      - IAMStack
+      - SQSStack
+      - APIGatewayStack
+    Properties:
+      TemplateURL: !Join
+        - ""
+        - - "https://"
+          - !ImportValue ArtifactBucketName
+          - ".s3."
+          - !Ref "AWS::Region"
+          - ".amazonaws.com/templates/lambda.yaml"
 
   # EventBridge Stack
   EventBridgeStack:
