@@ -75,16 +75,21 @@ Resources:
                   - events:DescribeEvents
                   - events:DescribeEventBus
                   - events:ListEventBuses
+                  - events:CreateEventBus
                   # Monitoring permissions for CloudWatch and log management
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                   - logs:DescribeLogStreams
                   # CodePipeline permissions to start, stop, and manage the pipeline
+                  - codepipeline:CreatePipeline
+                  - codepipeline:DeletePipeline
                   - codepipeline:StartPipelineExecution
                   - codepipeline:GetPipelineState
                   - codepipeline:PutActionRevision
+                  - codepipeline:PutApprovalResult
                   - codepipeline:GetPipeline
+                  - codepipeline:ListPipelines 
                   # Secrets Manager permissions to manage secrets
                   - secretsmanager:GetSecretValue
                   # IAM permissions for role management
@@ -111,6 +116,7 @@ Resources:
                   - sns:CreateTopic
                   - sns:Subscribe
                   - sns:SetTopicAttributes
+                  - sns:GetTopicAttributes
                   - sns:DeleteTopic
                 Resource: "*"
 
