@@ -94,15 +94,25 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
+                  # S3 Permissions
                   - s3:*
-                  - cloudwatch:*
-                  - sns:*
-                  - codebuild:*
-                  - codepipeline:*
-                  - iam:PassRole
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents  
+                  # CloudWatch Logs Permissions
                   - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  # CloudFormation Permissions
+                  - cloudformation:ValidateTemplate
+                  - cloudformation:DescribeStacks
+                  - cloudformation:UpdateStack
+                  - cloudformation:CreateStack
+                  # SNS Permissions
+                  - sns:*
+                  # CodeBuild Permissions
+                  - codebuild:*
+                  # CodePipeline Permissions
+                  - codepipeline:*
+                  # IAM Permissions for Role Management
+                  - iam:PassRole
                 Resource: "*"
 
 Outputs:
