@@ -17,7 +17,8 @@ Resources:
       Environment:
         Variables:
           QUEUE_URL: !ImportValue MyQueueUrl
-          BUCKET_NAME: !ImportValue StaticSiteBucketName
+          BUCKET_NAME: !ImportValue StaticSiteBucketName  # Import the StaticSiteBucketName from the root stack
+          API_ENDPOINT: !ImportValue APIEndpoint  # Import the API endpoint for invoking the Lambda function
 
   # DLQ Processor Lambda Function
   DLQProcessorFunction:
@@ -31,7 +32,7 @@ Resources:
         S3Bucket: !ImportValue ArtifactBucketName
         S3Key: lambda/dlqProcessor.zip
       Timeout: 10
-      
+
   # Cleanup Lambda Function
   CleanupFunction:
     Type: AWS::Lambda::Function

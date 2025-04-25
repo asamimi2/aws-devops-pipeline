@@ -51,15 +51,6 @@
         <button class="btn" onclick="uploadFile()">Upload</button>
     </div>
 
-    <script>
-        function uploadFile() {
-            const fileInput = document.getElementById('fileInput');
-            if (fileInput.files.length === 0) {
-                alert("Please choose a file to upload.");
-                return;
-            }
-            alert("File selected: " + fileInput.files[0].name);
-        }
-    </script>
+    <script src="main.js"></script> <!-- Include the main.js file for JavaScript logic -->
 </body>
 </html>

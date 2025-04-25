@@ -14,22 +14,9 @@ Resources:
           - !Ref "AWS::Region"
           - ".amazonaws.com/templates/iam.yaml"
 
-  # Static Site Stack Reference
-  # StaticSiteStack:
-  #   Type: AWS::CloudFormation::Stack
-  #   Properties:
-  #     TemplateURL: !Join
-  #       - ""
-  #       - - "https://"
-  #         - !ImportValue ArtifactBucketName
-  #         - ".s3."
-  #         - !Ref "AWS::Region"
-  #         - ".amazonaws.com/templates/s3.yaml"
-
   # SQS Stack
   SQSStack:
     Type: AWS::CloudFormation::Stack
-    # DependsOn: StaticSiteStack
     Properties:
       TemplateURL: !Join
         - ""
@@ -45,7 +32,6 @@ Resources:
     DependsOn: 
       - IAMStack
       - SQSStack
-      # - StaticSiteStack
     Properties:
       TemplateURL: !Join
         - ""
@@ -54,13 +40,27 @@ Resources:
           - ".s3."
           - !Ref "AWS::Region"
           - ".amazonaws.com/templates/lambda.yaml"
+  
+  # API Gateway Stack
+  APIGatewayStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: 
+      - SQSStack
+      - LambdaStack
+    Properties:
+      TemplateURL: !Join
+        - ""
+        - - "https://"
+          - !ImportValue ArtifactBucketName
+          - ".s3."
+          - !Ref "AWS::Region"
+          - ".amazonaws.com/templates/api.yaml"
 
   # EventBridge Stack
   EventBridgeStack:
     Type: AWS::CloudFormation::Stack
     DependsOn: 
       - SQSStack
-      # - StaticSiteStack
       - LambdaStack
     Properties:
       TemplateURL: !Join
@@ -76,7 +76,6 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: 
       - SQSStack
-      # - StaticSiteStack
       - LambdaStack
     Properties:
       TemplateURL: !Join
@@ -93,7 +92,6 @@ Resources:
     DependsOn: 
       - IAMStack
       - SQSStack
-      # - StaticSiteStack
       - LambdaStack
     Properties:
       TemplateURL: !Join
