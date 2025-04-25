@@ -68,7 +68,11 @@ Resources:
                   - events:PutTargets
                   - events:DescribeRule
                   - events:DeleteRule
+                  - events:PutEvents
+                  - events:DeleteEventBus
                   - events:ListTargetsByRule
+                  - events:DescribeEvents
+                  - events:ListEventBuses
                   # Monitoring permissions for CloudWatch and log management
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
