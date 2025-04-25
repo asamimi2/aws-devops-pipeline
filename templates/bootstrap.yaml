@@ -111,6 +111,7 @@ Resources:
                   - sns:CreateTopic
                   - sns:Subscribe
                   - sns:SetTopicAttributes
+                  - sns:DeleteTopic
                 Resource: "*"
 
   # Create the CodeBuild Project
