@@ -94,6 +94,8 @@ Resources:
                   - codebuild:*
                   - codepipeline:*
                   - iam:PassRole
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents  
                 Resource: "*"
 
 Outputs:
