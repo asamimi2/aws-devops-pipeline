@@ -1,28 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Root stack to orchestrate all sub-stacks and create required S3 buckets
 
-Parameters:
-  GitHubRepo:
-    Type: String
-    Description: GitHub repository name (e.g., aws-devops-pipeline)
-    Default: "aws-devops-pipeline"
-
-  GitHubOwner:
-    Type: String
-    Description: GitHub username or organization
-    Default: "asamimi2"
-
-  GitHubBranch:
-    Type: String
-    Default: main
-    Description: Branch to monitor
-
-  GitHubOAuthToken:
-    Type: String
-    NoEcho: true
-    Description: GitHub personal access token stored in Secrets Manager
-    Default: "{{resolve:secretsmanager:GitHubToken:SecretString}}"
-
 Resources:
   # IAM Stack Reference
   IAMStack:
@@ -125,8 +103,3 @@ Resources:
           - ".s3."
           - !Ref "AWS::Region"
           - ".amazonaws.com/templates/pipeline.yaml"
-      Parameters:
-        GitHubRepo: !Ref GitHubRepo
-        GitHubOwner: !Ref GitHubOwner
-        GitHubBranch: !Ref GitHubBranch
-        GitHubOAuthToken: !Ref GitHubOAuthToken

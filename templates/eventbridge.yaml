@@ -13,10 +13,10 @@ Resources:
     Properties:
       FunctionName: !Sub "${AWS::StackName}-ProcessDataLambda"
       Handler: index.handler
-      Role: !ImportValue LambdaExecutionRole.Arn
+      Role: !ImportValue LambdaExecutionRoleArn
       Code:
         S3Bucket: !ImportValue ArtifactBucketName
-        S3Key: lambda/processData.zip
+        S3Key: lambda/submitData.zip
       Runtime: python3.12
       Environment:
         Variables:
@@ -35,9 +35,9 @@ Resources:
         detail-type:
           - "AWS API Call via CloudTrail"
         resources:
-          - !ImportValue StaticSiteBucket
+          - !ImportValue StaticSiteBucketName
       Targets:
-        - Arn: !ImportValue ProcessDataLambda.Arn
+        - Arn: !ImportValue SubmitDataFunctionArn
           Id: "ProcessDataLambdaTarget"
 
 Outputs:

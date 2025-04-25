@@ -5,20 +5,23 @@ Parameters:
   GitHubRepo:
     Type: String
     Description: GitHub repository name (e.g., aws-devops-pipeline)
+    Default: "aws-devops-pipeline"
 
   GitHubOwner:
     Type: String
     Description: GitHub username or organization
+    Default: "asamimi2"
 
   GitHubBranch:
     Type: String
     Default: main
-    Description: Branch to monitor for changes
+    Description: Branch to monitor
 
   GitHubOAuthToken:
     Type: String
     NoEcho: true
     Description: GitHub personal access token stored in Secrets Manager
+    Default: "{{resolve:secretsmanager:GitHubToken:SecretString}}"
 
 Resources:
   # CodeBuild Project for building the app
@@ -27,7 +30,7 @@ Resources:
     Properties:
       Name: CodeBuildProject
       Description: CodeBuild Project for Building the App
-      ServiceRole: !ImportValue CodePipelineServiceRoleArn  # Import the role ARN
+      ServiceRole: !ImportValue CodeBuildServiceRoleArn  # Use the correct role for CodeBuild
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:7.0
@@ -52,7 +55,7 @@ Resources:
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
-      RoleArn: !ImportValue CodePipelineServiceRoleArn  # Import the role ARN
+      RoleArn: !ImportValue CodePipelineServiceRoleArn  # Correct role for CodePipeline
       ArtifactStore:
         Type: S3
         Location: !ImportValue ArtifactBucketName

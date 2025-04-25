@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: IAM roles and policies for the application
-  
+
 Resources:
   # Lambda Execution Role
   LambdaExecutionRole:
@@ -32,7 +32,7 @@ Resources:
                   - s3:GetObject
                 Resource: "*"
 
-  # IAM Role for CodePipeline to interact with other services
+  # CodePipeline Service Role
   CodePipelineServiceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -69,6 +69,33 @@ Resources:
                   - config:DescribeConfigRules
                 Resource: "*"
 
+  # CodeBuild Service Role
+  CodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AWS::StackName}-CodeBuildServiceRole"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub "${AWS::StackName}-CodeBuildPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:*
+                  - cloudwatch:*
+                  - sns:*
+                  - codebuild:*
+                  - codepipeline:*
+                  - iam:PassRole
+                Resource: "*"
+
 Outputs:
   LambdaExecutionRoleArn:
     Description: ARN of the Lambda execution role
@@ -81,3 +108,9 @@ Outputs:
     Value: !GetAtt CodePipelineServiceRole.Arn
     Export:
       Name: CodePipelineServiceRoleArn
+
+  CodeBuildServiceRoleArn:
+    Description: ARN of the CodeBuild service role
+    Value: !GetAtt CodeBuildServiceRole.Arn
+    Export:
+      Name: CodeBuildServiceRoleArn
