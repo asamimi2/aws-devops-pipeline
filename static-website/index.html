@@ -1,15 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Serverless Site</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Static Site</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+        }
+        h1 {
+            color: #333;
+        }
+        input[type="file"] {
+            margin: 10px 0;
+        }
+        .btn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-  <h1>Welcome to My AWS Static Site!</h1>
-  <form id="upload-form">
-    <input type="file" id="file" />
-    <button type="submit">Upload</button>
-  </form>
-  <script src="../main.js"></script>
+    <div class="container">
+        <h1>Welcome to My AWS Static Site!</h1>
+        <input type="file" id="fileInput">
+        <br>
+        <button class="btn" onclick="uploadFile()">Upload</button>
+    </div>
+
+    <script>
+        function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length === 0) {
+                alert("Please choose a file to upload.");
+                return;
+            }
+            alert("File selected: " + fileInput.files[0].name);
+        }
+    </script>
 </body>
 </html>
