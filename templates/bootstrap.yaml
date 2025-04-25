@@ -70,8 +70,10 @@ Resources:
                   - events:DeleteRule
                   - events:PutEvents
                   - events:DeleteEventBus
+                  - events:DeleteEvents
                   - events:ListTargetsByRule
                   - events:DescribeEvents
+                  - events:DescribeEventBus
                   - events:ListEventBuses
                   # Monitoring permissions for CloudWatch and log management
                   - logs:CreateLogGroup
@@ -94,6 +96,21 @@ Resources:
                   - iam:AttachRolePolicy
                   - iam:PassRole
                   - iam:PutRolePolicy
+                  # CodeBuild specific permissions
+                  - codebuild:CreateProject
+                  - codebuild:DeleteProject
+                  - codebuild:DescribeProjects
+                  - codebuild:UpdateProject
+                  - codebuild:StartBuild
+                  - codebuild:BatchGetBuilds
+                  # CloudWatch permissions for alarms
+                  - cloudwatch:PutMetricAlarm
+                  - cloudwatch:DescribeAlarms
+                  - cloudwatch:DeleteAlarms
+                  # SNS permissions for alarm notification
+                  - sns:CreateTopic
+                  - sns:Subscribe
+                  - sns:SetTopicAttributes
                 Resource: "*"
 
   # Create the CodeBuild Project
