@@ -119,6 +119,10 @@ Resources:
                   - codepipeline:*
                   # IAM Permissions for Role Management
                   - iam:PassRole
+                  # Lambda Permissions
+                  - lambda:UpdateFunctionConfiguration
+                  - lambda:InvokeFunction
+                  - lambda:UpdateFunctionCode
                 Resource: "*"
 
 Outputs:

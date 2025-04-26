@@ -55,7 +55,7 @@ Resources:
         Variables:
           QUEUE_URL: !ImportValue MyQueueUrl
           BUCKET_NAME: !ImportValue StaticSiteBucketName  # Import the StaticSiteBucketName from the root stack
-          API_ENDPOINT: !Ref APIGatewayRestAPI
+          API_ENDPOINT: !Sub "https://${APIGatewayRestAPI}.execute-api.${AWS::Region}.amazonaws.com/prod/upload"
 
   # DLQ Processor Lambda Function
   DLQProcessorFunction:
