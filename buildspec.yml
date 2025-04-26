@@ -8,7 +8,7 @@ phases:
       - echo "Setting environment variable ARTIFACT_BUCKET..."
       - export ARTIFACT_BUCKET=$ARTIFACT_BUCKET  # Ensure ARTIFACT_BUCKET is set
       - export STATIC_WEBSITE_BUCKET=$STATIC_WEBSITE_BUCKET  # Ensure STATIC_WEBSITE_BUCKET is set
-      
+
   build:
     commands:
       - echo "Zipping Lambda functions..."
@@ -31,17 +31,11 @@ phases:
       - aws s3 cp artifacts/ s3://$ARTIFACT_BUCKET/lambda/ --recursive
       - aws s3 ls s3://$ARTIFACT_BUCKET/lambda/
 
-      # Debugging: List files in the static-website directory
-      - echo "Listing files in static-website directory..."
-      - find static-website/ -type f \( -name "*.html" -o -name "*.js" \)
+      # Upload only index.html and main.js from static-website
+      - echo "Uploading Static Website Files (index.html and main.js) to S3..."
+      - aws s3 cp static-website/index.html s3://$STATIC_WEBSITE_BUCKET/index.html
+      - aws s3 cp static-website/main.js s3://$STATIC_WEBSITE_BUCKET/main.js
 
-      # Upload Static Website files, only the contents from the static-website folder
-      - echo "Uploading Static Website Files to S3..."
-      - |
-        find static-website/ -type f \( -name "*.html" -o -name "*.js" \) | while read file; do
-          echo "Uploading $file to S3..."
-          aws s3 cp "$file" "s3://$STATIC_WEBSITE_BUCKET/$(basename "$file")"
-        done
       - aws s3 ls s3://$STATIC_WEBSITE_BUCKET/
 
       # Upload CloudFormation templates to Artifact Bucket
@@ -52,7 +46,7 @@ phases:
       - echo "Validating root stack template..."
       - aws cloudformation validate-template --template-body file://templates/root.yaml
 
-      - echo "Deploying root stack..."
+      - echo "Deploying root stack with updated Lambda functions..."
       - aws cloudformation deploy --template-file templates/root.yaml --stack-name devops-root-stack --capabilities CAPABILITY_NAMED_IAM
 
 artifacts:
