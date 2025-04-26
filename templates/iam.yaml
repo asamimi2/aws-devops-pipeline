@@ -126,6 +126,9 @@ Resources:
                   - lambda:UpdateFunctionConfiguration
                   - lambda:InvokeFunction
                   - lambda:UpdateFunctionCode
+                  # API Gateway Permissions (added for CORS support)
+                  - apigateway:GET
+                  - apigateway:OPTIONS
                 Resource: "*"
 
 Outputs:
