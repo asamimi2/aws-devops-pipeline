@@ -33,9 +33,9 @@ Resources:
         IntegrationResponses:
           - StatusCode: 200
             ResponseParameters:
-              integration.response.header.Access-Control-Allow-Origin: "'*'"
-              integration.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
-              integration.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
       MethodResponses:
         - StatusCode: 200
           ResponseParameters:
@@ -65,9 +65,9 @@ Resources:
         IntegrationResponses:
           - StatusCode: 200
             ResponseParameters:
-              integration.response.header.Access-Control-Allow-Origin: "'*'"
-              integration.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
-              integration.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
 
   # Deploy the API Gateway
   ApiGatewayDeployment:
