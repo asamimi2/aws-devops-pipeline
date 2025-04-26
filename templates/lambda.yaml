@@ -30,19 +30,19 @@ Resources:
         IntegrationHttpMethod: POST
         Type: AWS_PROXY
         Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SubmitDataFunction.Arn}/invocations
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              integration.response.header.Access-Control-Allow-Origin: "'*'"
+              integration.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              integration.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+
       MethodResponses:
         - StatusCode: 200
           ResponseParameters:
             method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Allow-Methods: true
             method.response.header.Access-Control-Allow-Headers: true
-
-      IntegrationResponses:
-        - StatusCode: 200
-          ResponseParameters:
-            integration.response.header.Access-Control-Allow-Origin: "'*'"
-            integration.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
-            integration.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
 
   # Create Method for OPTIONS on /upload (CORS preflight request)
   OptionsMethod:
