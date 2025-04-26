@@ -33,7 +33,7 @@ phases:
 
       # Upload Static Website files, only the contents from the static-website folder
       - echo "Uploading Static Website Files to S3..."
-      - aws s3 cp static-website/ s3://$STATIC_WEBSITE_BUCKET/ --recursive --exclude "*" --include "*.html" --include "*.js"
+      - find static-website/ -type f \( -name "*.html" -o -name "*.js" \) -exec aws s3 cp {} s3://$STATIC_WEBSITE_BUCKET/ \;
       - aws s3 ls s3://$STATIC_WEBSITE_BUCKET/
 
       # Upload CloudFormation templates to Artifact Bucket
