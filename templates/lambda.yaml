@@ -46,7 +46,7 @@ Resources:
       FunctionName: SubmitDataFunction
       Runtime: python3.12
       Handler: handler.lambda_handler
-      Role: !ImportValue LambdaExecutionRoleArn
+      Role: !ImportValue LambdaExecutionRoleArn  # Use imported Lambda execution role
       Code:
         S3Bucket: !ImportValue ArtifactBucketName
         S3Key: lambda/submitData.zip
@@ -55,7 +55,7 @@ Resources:
         Variables:
           QUEUE_URL: !ImportValue MyQueueUrl
           BUCKET_NAME: !ImportValue StaticSiteBucketName  # Import the StaticSiteBucketName from the root stack
-          API_ENDPOINT: !ImportValue APIEndpoint  # Import the API endpoint for invoking the Lambda function
+          API_ENDPOINT: !Sub "https://${APIGatewayRestAPI}.execute-api.${AWS::Region}.amazonaws.com/prod/upload"  # Directly reference API Gateway endpoint
 
   # DLQ Processor Lambda Function
   DLQProcessorFunction:
@@ -64,7 +64,7 @@ Resources:
       FunctionName: DLQProcessorFunction
       Runtime: python3.12
       Handler: handler.lambda_handler
-      Role: !ImportValue LambdaExecutionRoleArn
+      Role: !ImportValue LambdaExecutionRoleArn  # Use imported Lambda execution role
       Code:
         S3Bucket: !ImportValue ArtifactBucketName
         S3Key: lambda/dlqProcessor.zip
@@ -77,7 +77,7 @@ Resources:
       FunctionName: CleanupFunction
       Runtime: python3.12
       Handler: handler.lambda_handler
-      Role: !ImportValue LambdaExecutionRoleArn
+      Role: !ImportValue LambdaExecutionRoleArn  # Use imported Lambda execution role
       Code:
         S3Bucket: !ImportValue ArtifactBucketName
         S3Key: lambda/cleanup.zip
@@ -85,33 +85,6 @@ Resources:
       Environment:
         Variables:
           BUCKET_NAME: !ImportValue StaticSiteBucketName  # Attach StaticSiteBucketName from the root stack
-
-  # Lambda execution role (to allow Lambda functions to perform necessary actions)
-  LambdaExecutionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: LambdaExecutionRole
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
-      Policies:
-        - PolicyName: LambdaExecutionPolicy
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:PutObject
-                  - s3:GetObject
-                  - sqs:SendMessage
-                  - sqs:ReceiveMessage
-                Resource:
-                  - arn:aws:s3:::${StaticSiteBucketName}/*
-                  - arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:devops-sqs-queue
 
 Outputs:
   APIEndpoint:
