@@ -187,6 +187,7 @@ Resources:
             Action:
               - s3:GetObject
               - s3:ListBucket
+              - s3:PutObject
             Resource: 
               - !Sub "arn:aws:s3:::${StaticSiteBucket}/*"
               - !Sub "arn:aws:s3:::${StaticSiteBucket}"
