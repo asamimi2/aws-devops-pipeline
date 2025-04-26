@@ -1,5 +1,5 @@
 // Use the actual API endpoint from API Gateway
-const apiEndpoint = 'https://4tpj8cjkfe.execute-api.us-east-2.amazonaws.com/prod/upload';  // API Gateway endpoint
+const apiEndpoint = 'https://4tpj8cjkfe.execute-api.us-east-2.amazonaws.com/prod/upload'; // API Gateway endpoint
 
 // Function to handle file upload to Lambda via API Gateway
 function uploadFileToLambda(fileData, fileName) {
@@ -13,15 +13,29 @@ function uploadFileToLambda(fileData, fileName) {
             file_data: fileData // base64-encoded data
         })
     })
-    .then(response => response.json())
-    .then(data => {
-        console.log(data);  // Handle the Lambda response here
-        if (data.api_details && data.api_details.api_endpoint) {
-            console.log("API Endpoint:", data.api_details.api_endpoint);
+    .then(response => {
+        // Check if the response status is OK (200-299)
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
         }
+        return response.json();
+    })
+    .then(data => {
+        console.log("Lambda Response:", data); // Handle the Lambda response here
+        if (data.api_endpoint) {
+            console.log("API Endpoint:", data.api_endpoint);
+        }
+        alert("File uploaded successfully!");
     })
     .catch(error => {
-        console.error('Error calling Lambda via API Gateway:', error);
+        // Handle CORS errors or other fetch-related issues
+        if (error.message.includes('Failed to fetch')) {
+            console.error('CORS error or network issue:', error);
+            alert('CORS error or network issue. Please check your API Gateway configuration.');
+        } else {
+            console.error('Error calling Lambda via API Gateway:', error);
+            alert(`Error: ${error.message}`);
+        }
     });
 }
 
