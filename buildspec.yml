@@ -33,11 +33,15 @@ phases:
 
       # Debugging: List files in the static-website directory
       - echo "Listing files in static-website directory..."
-      - find static-website/ -type f
+      - find static-website/ -type f \( -name "*.html" -o -name "*.js" \)
 
       # Upload Static Website files, only the contents from the static-website folder
       - echo "Uploading Static Website Files to S3..."
-      - find static-website/ -type f \( -name "*.html" -o -name "*.js" \) -exec echo "Uploading {} to S3" \; -exec aws s3 cp {} s3://$STATIC_WEBSITE_BUCKET/ \;
+      - |
+        find static-website/ -type f \( -name "*.html" -o -name "*.js" \) | while read file; do
+          echo "Uploading $file to S3..."
+          aws s3 cp "$file" "s3://$STATIC_WEBSITE_BUCKET/$(basename "$file")"
+        done
       - aws s3 ls s3://$STATIC_WEBSITE_BUCKET/
 
       # Upload CloudFormation templates to Artifact Bucket
