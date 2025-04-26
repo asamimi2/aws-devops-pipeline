@@ -33,8 +33,8 @@ phases:
 
       # Upload only index.html and main.js from static-website
       - echo "Uploading Static Website Files (index.html and main.js) to S3..."
-      - aws s3 cp static-website/index.html s3://$STATIC_WEBSITE_BUCKET/index.html
-      - aws s3 cp static-website/main.js s3://$STATIC_WEBSITE_BUCKET/main.js
+      - aws s3 cp static-website/index.html s3://$STATIC_WEBSITE_BUCKET/index.html --recursive
+      - aws s3 cp static-website/main.js s3://$STATIC_WEBSITE_BUCKET/main.js --recursive
 
       - aws s3 ls s3://$STATIC_WEBSITE_BUCKET/
 
