@@ -6,8 +6,8 @@ phases:
       python: 3.12
     commands:
       - echo "Setting environment variable ARTIFACT_BUCKET..."
-      - export ARTIFACT_BUCKET=$ARTIFACT_BUCKET  # ARTIFACT_BUCKET should already be set by CodeBuild
-      - export STATIC_WEBSITE_BUCKET=$STATIC_WEBSITE_BUCKET  # Set static website bucket variable
+      - export ARTIFACT_BUCKET=$ARTIFACT_BUCKET  # Ensure ARTIFACT_BUCKET is set
+      - export STATIC_WEBSITE_BUCKET=$STATIC_WEBSITE_BUCKET  # Ensure STATIC_WEBSITE_BUCKET is set
       
   build:
     commands:
@@ -31,9 +31,9 @@ phases:
       - aws s3 cp artifacts/ s3://$ARTIFACT_BUCKET/lambda/ --recursive
       - aws s3 ls s3://$ARTIFACT_BUCKET/lambda/
 
-      # Upload Static Website files, only the contents from the static-website folder (excluding unwanted files)
+      # Upload Static Website files, only the contents from the static-website folder
       - echo "Uploading Static Website Files to S3..."
-      - aws s3 cp static-website/ s3://$STATIC_WEBSITE_BUCKET/ --recursive --exclude "*.yaml" --exclude "*.yml" --exclude "*.zip" --exclude "*.git/*"
+      - aws s3 cp static-website/ s3://$STATIC_WEBSITE_BUCKET/ --recursive --exclude "*.yaml" --exclude "*.yml" --exclude "*.zip"
       - aws s3 ls s3://$STATIC_WEBSITE_BUCKET/
 
       # Upload CloudFormation templates to Artifact Bucket
