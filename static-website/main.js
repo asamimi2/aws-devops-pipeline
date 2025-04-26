@@ -1,7 +1,12 @@
-const apiEndpoint = 'https://<api-id>.execute-api.<region>.amazonaws.com/prod/upload'; // Default or placeholder
+let apiEndpoint = ''; // Variable to store API Endpoint
 
 // Function to handle file upload
 function uploadFileToLambda(fileData, fileName) {
+    if (!apiEndpoint) {
+        console.error('API Endpoint is not defined.');
+        return;
+    }
+
     fetch(apiEndpoint, {  // Use the dynamic API endpoint
         method: 'POST',
         headers: {
@@ -16,10 +21,10 @@ function uploadFileToLambda(fileData, fileName) {
     .then(data => {
         console.log(data);  // Handle the Lambda response here
 
-        if (data.api_details && data.api_details.api_endpoint) {
-            console.log("API Endpoint:", data.api_details.api_endpoint);
-            // Use the dynamic API endpoint from the Lambda response if needed
-            // You can now call this endpoint for further processing if necessary
+        // Store the updated API endpoint from the Lambda response
+        if (data.api_endpoint) {
+            apiEndpoint = data.api_endpoint;
+            console.log("Updated API Endpoint:", apiEndpoint);
         }
     })
     .catch(error => {
