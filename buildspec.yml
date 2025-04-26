@@ -31,9 +31,13 @@ phases:
       - aws s3 cp artifacts/ s3://$ARTIFACT_BUCKET/lambda/ --recursive
       - aws s3 ls s3://$ARTIFACT_BUCKET/lambda/
 
+      # Debugging: List files in the static-website directory
+      - echo "Listing files in static-website directory..."
+      - find static-website/ -type f
+
       # Upload Static Website files, only the contents from the static-website folder
       - echo "Uploading Static Website Files to S3..."
-      - find static-website/ -type f \( -name "*.html" -o -name "*.js" \) -exec aws s3 cp {} s3://$STATIC_WEBSITE_BUCKET/ \;
+      - find static-website/ -type f \( -name "*.html" -o -name "*.js" \) -exec echo "Uploading {} to S3" \; -exec aws s3 cp {} s3://$STATIC_WEBSITE_BUCKET/ \;
       - aws s3 ls s3://$STATIC_WEBSITE_BUCKET/
 
       # Upload CloudFormation templates to Artifact Bucket
