@@ -51,6 +51,12 @@ Resources:
       HttpMethod: OPTIONS
       ResourceId: !Ref UploadResource
       RestApiId: !Ref APIGatewayRestAPI
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Headers: true
       Integration:
         IntegrationHttpMethod: OPTIONS
         Type: MOCK
@@ -59,15 +65,10 @@ Resources:
         IntegrationResponses:
           - StatusCode: 200
             ResponseParameters:
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
-      MethodResponses:
-        - StatusCode: 200
-          ResponseParameters:
-            method.response.header.Access-Control-Allow-Origin: true
-            method.response.header.Access-Control-Allow-Methods: true
-            method.response.header.Access-Control-Allow-Headers: true
+              integration.response.header.Access-Control-Allow-Origin: "'*'"
+              integration.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              integration.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"  # Ensure this is allowed
+
 
   # Deploy the API Gateway
   ApiGatewayDeployment:
