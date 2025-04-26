@@ -1,8 +1,8 @@
-const apiEndpoint = 'https://<api-id>.execute-api.<region>.amazonaws.com/prod/lambda';  // Replace with your actual endpoint
+const apiEndpoint = 'https://<api-id>.execute-api.<region>.amazonaws.com/prod/upload'; // Default or placeholder
 
 // Function to handle file upload
 function uploadFileToLambda(fileData, fileName) {
-    fetch(apiEndpoint, {
+    fetch(apiEndpoint, {  // Use the dynamic API endpoint
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -15,6 +15,12 @@ function uploadFileToLambda(fileData, fileName) {
     .then(response => response.json())
     .then(data => {
         console.log(data);  // Handle the Lambda response here
+
+        if (data.api_details && data.api_details.api_endpoint) {
+            console.log("API Endpoint:", data.api_details.api_endpoint);
+            // Use the dynamic API endpoint from the Lambda response if needed
+            // You can now call this endpoint for further processing if necessary
+        }
     })
     .catch(error => {
         console.error('Error calling Lambda via API Gateway:', error);
