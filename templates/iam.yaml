@@ -201,6 +201,8 @@ Resources:
                   - apigateway:GET
                   - apigateway:DELETE
                   - apigateway:PATCH
+                  #CloudFront permissions for distribution management
+                  - cloudfront:CreateInvalidation
                 Resource: "*"
 
 Outputs:

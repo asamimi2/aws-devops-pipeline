@@ -125,6 +125,8 @@ Resources:
                   - apigateway:GET
                   - apigateway:DELETE
                   - apigateway:PATCH
+                  #CloudFront permissions for distribution management
+                  - cloudfront:CreateInvalidation
                 Resource: "*"
   
   # Create the artifact bucket
@@ -182,8 +184,12 @@ Resources:
           - Sid: PublicReadGetObject
             Effect: Allow
             Principal: "*"
-            Action: s3:GetObject
-            Resource: !Sub "arn:aws:s3:::${StaticSiteBucket}/*"
+            Action:
+              - s3:GetObject
+              - s3:ListBucket
+            Resource: 
+              - !Sub "arn:aws:s3:::${StaticSiteBucket}/*"
+              - !Sub "arn:aws:s3:::${StaticSiteBucket}"
 
   # Create the CodeBuild Project
   BootstrapBuildProject:
