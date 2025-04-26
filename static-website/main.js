@@ -1,5 +1,5 @@
 // Use the actual API endpoint from API Gateway
-const apiEndpoint = 'https://5zledlwm21.execute-api.us-east-2.amazonaws.com/prod/upload';  // API Gateway endpoint
+const apiEndpoint = 'https://4tpj8cjkfe.execute-api.us-east-2.amazonaws.com/prod/upload';  // API Gateway endpoint
 
 // Function to handle file upload to Lambda via API Gateway
 function uploadFileToLambda(fileData, fileName) {
