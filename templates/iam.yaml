@@ -128,6 +128,7 @@ Resources:
                   - lambda:UpdateFunctionCode
                   # API Gateway Permissions (added for CORS support)
                   - apigateway:GET
+                  - apigateway:POST
                   - apigateway:OPTIONS
                 Resource: "*"
 
