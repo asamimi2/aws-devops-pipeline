@@ -29,10 +29,10 @@ Resources:
                   - cloudformation:DescribeStacks
                   - cloudformation:UpdateStack
                   - cloudformation:ListStackResources
-                  - cloudformation:CreateChangeSet  # <-- Add this line
-                  - cloudformation:ExecuteChangeSet # <-- Add this line
-                  - cloudformation:DescribeChangeSet # <-- Add this line
-                  - cloudformation:getTemplateSummary # <-- Add this line
+                  - cloudformation:CreateChangeSet
+                  - cloudformation:ExecuteChangeSet
+                  - cloudformation:DescribeChangeSet
+                  - cloudformation:getTemplateSummary
                   - cloudformation:ValidateTemplate
                   # Lambda permissions for invocation and management
                   - lambda:CreateFunction

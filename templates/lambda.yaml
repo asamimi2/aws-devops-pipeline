@@ -1,7 +1,44 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Lambda functions and IAM roles
+Description: API Gateway, Lambda Functions, and IAM roles for file upload
 
 Resources:
+  # Create API Gateway
+  APIGatewayRestAPI:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: MyAPIGateway
+      Description: API Gateway for file uploads
+      FailOnWarnings: true
+
+  # Create Resource (/upload)
+  UploadResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref APIGatewayRestAPI
+      ParentId: !GetAtt APIGatewayRestAPI.RootResourceId
+      PathPart: upload
+
+  # Create Method for POST on /upload (integrated with Lambda)
+  UploadMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: POST
+      ResourceId: !Ref UploadResource
+      RestApiId: !Ref APIGatewayRestAPI
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SubmitDataFunction.Arn}/invocations
+
+  # Deploy the API Gateway
+  ApiGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: UploadMethod
+    Properties:
+      RestApiId: !Ref APIGatewayRestAPI
+      StageName: prod
+
   # Submit Data Lambda Function
   SubmitDataFunction:
     Type: AWS::Lambda::Function
@@ -49,7 +86,40 @@ Resources:
         Variables:
           BUCKET_NAME: !ImportValue StaticSiteBucketName  # Attach StaticSiteBucketName from the root stack
 
+  # Lambda execution role (to allow Lambda functions to perform necessary actions)
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: LambdaExecutionRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaExecutionPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - sqs:SendMessage
+                  - sqs:ReceiveMessage
+                Resource:
+                  - arn:aws:s3:::${StaticSiteBucketName}/*
+                  - arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:devops-sqs-queue
+
 Outputs:
+  APIEndpoint:
+    Description: "API Gateway endpoint URL"
+    Value: !Sub "https://${APIGatewayRestAPI}.execute-api.${AWS::Region}.amazonaws.com/prod/upload"
+    Export:
+      Name: "APIEndpoint"
+
   SubmitDataFunctionArn:
     Value: !GetAtt SubmitDataFunction.Arn
     Export:

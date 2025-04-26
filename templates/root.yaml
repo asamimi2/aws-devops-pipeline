@@ -25,18 +25,6 @@ Resources:
           - ".s3."
           - !Ref "AWS::Region"
           - ".amazonaws.com/templates/sqs.yaml"
-  
-  # API Gateway Stack
-  APIGatewayStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Join
-        - ""
-        - - "https://"
-          - !ImportValue ArtifactBucketName
-          - ".s3."
-          - !Ref "AWS::Region"
-          - ".amazonaws.com/templates/api.yaml"
 
   # Lambda Stack
   LambdaStack:
