@@ -32,7 +32,6 @@ Resources:
     DependsOn: 
       - IAMStack
       - SQSStack
-      - APIGatewayStack
     Properties:
       TemplateURL: !Join
         - ""
