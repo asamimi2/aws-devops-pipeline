@@ -55,7 +55,7 @@ Resources:
         Variables:
           QUEUE_URL: !ImportValue MyQueueUrl
           BUCKET_NAME: !ImportValue StaticSiteBucketName  # Import the StaticSiteBucketName from the root stack
-          # Remove API_ENDPOINT here, no need for it anymore.
+          API_ENDPOINT: !Ref APIGatewayRestAPI
 
   # DLQ Processor Lambda Function
   DLQProcessorFunction:
