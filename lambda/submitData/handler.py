@@ -47,6 +47,11 @@ def lambda_handler(event, context):
         # Return the API endpoint
         return {
             "statusCode": 200,
+            "headers": {
+                "Access-Control-Allow-Origin": "*",  # Allow all origins
+                "Access-Control-Allow-Methods": "OPTIONS,POST,GET",  # Allowed methods
+                "Access-Control-Allow-Headers": "Content-Type,Authorization"  # Allowed headers
+            },
             "body": json.dumps({
                 "message": "File uploaded successfully!",
                 "api_endpoint": API_ENDPOINT  # Send the API endpoint back
@@ -56,5 +61,10 @@ def lambda_handler(event, context):
     except Exception as e:
         return {
             "statusCode": 500,
+            "headers": {
+                "Access-Control-Allow-Origin": "*",  # Allow all origins
+                "Access-Control-Allow-Methods": "OPTIONS,POST,GET",  # Allowed methods
+                "Access-Control-Allow-Headers": "Content-Type,Authorization"  # Allowed headers
+            },
             "body": json.dumps({"error": str(e)})
         }
