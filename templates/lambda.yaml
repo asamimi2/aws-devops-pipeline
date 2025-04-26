@@ -67,8 +67,8 @@ Resources:
             ResponseParameters:
               integration.response.header.Access-Control-Allow-Origin: "'*'"
               integration.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
-              integration.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
-
+              integration.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"  # Fix the mapping expression here
+  
   # Deploy the API Gateway
   ApiGatewayDeployment:
     Type: AWS::ApiGateway::Deployment

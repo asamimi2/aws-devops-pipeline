@@ -97,39 +97,110 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  # S3 Permissions
+                  # S3 permissions for artifact storage and template access
                   - s3:*
-                  # CloudWatch Logs Permissions
+                  # CloudFormation permissions to create, update, and delete stacks
+                  - cloudformation:CreateStack
+                  - cloudformation:DeleteStack
+                  - cloudformation:DescribeStacks
+                  - cloudformation:UpdateStack
+                  - cloudformation:ListStackResources
+                  - cloudformation:CreateChangeSet
+                  - cloudformation:ExecuteChangeSet
+                  - cloudformation:DescribeChangeSet
+                  - cloudformation:getTemplateSummary
+                  - cloudformation:ValidateTemplate
+                  # Lambda permissions for invocation and management
+                  - lambda:CreateFunction
+                  - lambda:InvokeFunction
+                  - lambda:UpdateFunctionCode
+                  - lambda:DeleteFunction
+                  - lambda:GetFunction
+                  # SQS permissions to create and manage queues
+                  - sqs:CreateQueue
+                  - sqs:DeleteQueue
+                  - sqs:GetQueueUrl
+                  - sqs:SetQueueAttributes
+                  - sqs:SendMessage
+                  - sqs:GetQueueAttributes
+                  - sqs:DeleteMessage
+                  - sqs:ReceiveMessage
+                  # EventBridge permissions to create and manage rules
+                  - events:PutRule
+                  - events:PutTargets
+                  - events:DescribeRule
+                  - events:DeleteRule
+                  - events:PutEvents
+                  - events:DeleteEventBus
+                  - events:DeleteEvents
+                  - events:ListTargetsByRule
+                  - events:DescribeEvents
+                  - events:DescribeEventBus
+                  - events:ListEventBuses
+                  - events:CreateEventBus
+                  - events:RemoveTargets
+                  # Monitoring permissions for CloudWatch and log management
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                  # CloudFormation Permissions
-                  - cloudformation:ValidateTemplate
-                  - cloudformation:DescribeStacks
-                  - cloudformation:UpdateStack
-                  - cloudformation:CreateStack
-                  - cloudformation:GetTemplateSummary
-                  - cloudformation:CreateChangeSet
-                  - cloudformation:DescribeChangeSet
-                  - cloudformation:ExecuteChangeSet
-                  - cloudformation:ListStackResources
-                  - cloudformation:DescribeStackResources
-                  # SNS Permissions
-                  - sns:*
-                  # CodeBuild Permissions
-                  - codebuild:*
-                  # CodePipeline Permissions
-                  - codepipeline:*
-                  # IAM Permissions for Role Management
+                  - logs:DescribeLogStreams
+                  - logs:DeleteLogGroup
+                  - logs:DeleteLogStream
+                  # CodePipeline permissions to start, stop, and manage the pipeline
+                  - codepipeline:CreatePipeline
+                  - codepipeline:DeletePipeline
+                  - codepipeline:StartPipelineExecution
+                  - codepipeline:GetPipelineState
+                  - codepipeline:PutActionRevision
+                  - codepipeline:PutApprovalResult
+                  - codepipeline:GetPipeline
+                  - codepipeline:ListPipelines 
+                  # Secrets Manager permissions to manage secrets
+                  - secretsmanager:GetSecretValue
+                  # IAM permissions for role management
+                  - iam:DeleteRolePolicy
+                  - iam:GetRole
+                  - iam:GetRolePolicy
+                  - iam:CreateRole
+                  - iam:DeleteRole
+                  - iam:AttachRolePolicy
                   - iam:PassRole
-                  # Lambda Permissions
-                  - lambda:UpdateFunctionConfiguration
-                  - lambda:InvokeFunction
-                  - lambda:UpdateFunctionCode
-                  # API Gateway Permissions (added for CORS support)
-                  - apigateway:GET
+                  - iam:PutRolePolicy
+                  # CodeBuild specific permissions
+                  - codebuild:CreateProject
+                  - codebuild:DeleteProject
+                  - codebuild:DescribeProjects
+                  - codebuild:UpdateProject
+                  - codebuild:StartBuild
+                  - codebuild:BatchGetBuilds
+                  # CloudWatch permissions for alarms
+                  - cloudwatch:PutMetricAlarm
+                  - cloudwatch:DescribeAlarms
+                  - cloudwatch:DeleteAlarms
+                  # SNS permissions for alarm notification
+                  - sns:CreateTopic
+                  - sns:Subscribe
+                  - sns:SetTopicAttributes
+                  - sns:GetTopicAttributes
+                  - sns:DeleteTopic
+                  # API Gateway permissions for creating and managing APIs
+                  - apigateway:CreateRestApi
+                  - apigateway:CreateResource
+                  - apigateway:CreateMethod
+                  - apigateway:CreateMethodResponse
+                  - apigateway:CreateIntegration
+                  - apigateway:CreateDeployment
+                  - apigateway:DeleteRestApi
+                  - apigateway:DeleteResource
+                  - apigateway:DeleteMethod
+                  - apigateway:DeleteMethodResponse
+                  - apigateway:DeleteIntegration
+                  - apigateway:DeleteDeployment
                   - apigateway:POST
-                  - apigateway:OPTIONS
+                  - apigateway:PUT
+                  - apigateway:GET
+                  - apigateway:DELETE
+                  - apigateway:PATCH
                 Resource: "*"
 
 Outputs:
