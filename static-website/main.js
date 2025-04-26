@@ -1,12 +1,7 @@
-let apiEndpoint = ''; // Variable to store API Endpoint
+const apiEndpoint = 'https://<api-id>.execute-api.<region>.amazonaws.com/prod/upload'; // Placeholder API endpoint
 
-// Function to handle file upload
+// Function to handle file upload to Lambda
 function uploadFileToLambda(fileData, fileName) {
-    if (!apiEndpoint) {
-        console.error('API Endpoint is not defined.');
-        return;
-    }
-
     fetch(apiEndpoint, {  // Use the dynamic API endpoint
         method: 'POST',
         headers: {
@@ -21,10 +16,9 @@ function uploadFileToLambda(fileData, fileName) {
     .then(data => {
         console.log(data);  // Handle the Lambda response here
 
-        // Store the updated API endpoint from the Lambda response
-        if (data.api_endpoint) {
-            apiEndpoint = data.api_endpoint;
-            console.log("Updated API Endpoint:", apiEndpoint);
+        if (data.api_details && data.api_details.api_endpoint) {
+            console.log("API Endpoint:", data.api_details.api_endpoint);
+            // You can now use the API endpoint if necessary
         }
     })
     .catch(error => {
@@ -32,15 +26,14 @@ function uploadFileToLambda(fileData, fileName) {
     });
 }
 
-// Example function for selecting file and uploading
-function handleFileUpload(event) {
-    const file = event.target.files[0];
-    if (!file) {
+// Function to handle file input and upload
+function uploadFile() {
+    const fileInput = document.getElementById('fileInput');
+    if (fileInput.files.length === 0) {
         alert("Please choose a file to upload.");
         return;
     }
-
-    // Read the file and encode it as base64
+    const file = fileInput.files[0];
     const reader = new FileReader();
     reader.onloadend = () => {
         const base64FileData = reader.result.split(',')[1]; // Get base64-encoded data
