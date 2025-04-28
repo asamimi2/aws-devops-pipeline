@@ -19,12 +19,13 @@ def lambda_handler(event, context):
         
         file_key = "uploads/uploaded_file"
         
-        # Upload the file to S3
+        # Upload file to S3
         s3.put_object(Bucket=BUCKET_NAME, Key=file_key, Body=body)
         
-        # Send a message to SQS
+        # Send message to SQS
         sqs.send_message(QueueUrl=QUEUE_URL, MessageBody=json.dumps({"fileKey": file_key}))
 
+        # Return successful CORS-enabled response
         return {
             "statusCode": 200,
             "headers": {
@@ -34,8 +35,11 @@ def lambda_handler(event, context):
             },
             "body": json.dumps({"message": "Upload successful"})
         }
+
     except Exception as e:
-        print("Error:", e)
+        print("Error:", str(e))
+        
+        # Return error CORS-enabled response
         return {
             "statusCode": 500,
             "headers": {
