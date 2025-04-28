@@ -17,10 +17,17 @@ def lambda_handler(event, context):
         if event.get('isBase64Encoded'):
             body = base64.b64decode(body)
 
-        file_key = "uploads/uploaded_file"
+        # Parse JSON if necessary
+        body_json = json.loads(body)
+
+        # Get the file name and file data
+        file_name = body_json['file_name']
+        file_data = base64.b64decode(body_json['file_data'])
+
+        file_key = f"uploads/{file_name}"
 
         # Upload the file to S3
-        s3.put_object(Bucket=BUCKET_NAME, Key=file_key, Body=body)
+        s3.put_object(Bucket=BUCKET_NAME, Key=file_key, Body=file_data)
 
         # Send a message to SQS
         sqs.send_message(QueueUrl=QUEUE_URL, MessageBody=json.dumps({"fileKey": file_key}))
@@ -32,7 +39,7 @@ def lambda_handler(event, context):
                 "Access-Control-Allow-Methods": "POST, OPTIONS",
                 "Access-Control-Allow-Headers": "Content-Type, Authorization",
             },
-            "body": json.dumps({"message": "Upload successful"})
+            "body": json.dumps({"message": "Upload successful", "fileKey": file_key})
         }
 
     except Exception as e:
