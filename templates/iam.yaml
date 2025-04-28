@@ -37,6 +37,9 @@ Resources:
                   - s3:DeleteObject
                   - s3:GetObject
                   - s3:PutObject
+                  - sqs:GetQueueAttributes
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
                 Resource: "*"
 
   # CodePipeline Service Role
