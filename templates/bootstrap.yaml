@@ -44,6 +44,7 @@ Resources:
                   - lambda:DeleteEventSourceMapping
                   - lambda:UpdateEventSourceMapping
                   - lambda:GetEventSourceMapping
+                  - lambda:RemovePermission
                   # SQS permissions to create and manage queues
                   - sqs:CreateQueue
                   - sqs:DeleteQueue
