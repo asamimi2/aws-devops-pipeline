@@ -95,19 +95,6 @@ Resources:
           BUCKET_NAME: !ImportValue StaticSiteBucketName  # Import the StaticSiteBucketName from the root stack
           API_ENDPOINT: !Ref APIGatewayRestAPI
 
-  # DLQ Processor Lambda Function
-  DLQProcessorFunction:
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName: DLQProcessorFunction
-      Runtime: python3.12
-      Handler: handler.lambda_handler
-      Role: !ImportValue LambdaExecutionRoleArn  # Use imported Lambda execution role
-      Code:
-        S3Bucket: !ImportValue ArtifactBucketName
-        S3Key: lambda/dlqProcessor.zip
-      Timeout: 10
-
   # Cleanup Lambda Function
   CleanupFunction:
     Type: AWS::Lambda::Function
