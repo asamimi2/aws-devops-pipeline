@@ -15,6 +15,19 @@ phases:
       - echo "Preparing artifacts with version $VERSION..."
       - mkdir -p artifacts/lambdas artifacts/templates artifacts/static-site
 
+      # Clean up old Lambda artifacts first
+      - echo "Deleting old Lambda artifacts in S3..."
+      - aws s3 rm s3://$ARTIFACT_BUCKET/lambda/ --recursive || true
+
+      # Verify the folder is empty
+      - echo "Verifying S3 lambda/ folder is empty..."
+      - |
+        until [ "$(aws s3 ls s3://$ARTIFACT_BUCKET/lambda/ | wc -l)" -eq 0 ]; do
+          echo "Waiting for lambda/ folder to be empty..."
+          sleep 2
+        done
+      - echo "lambda/ folder is empty. Proceeding..."
+
       # Zip Lambda functions with VERSION in filename
       - cd lambda/submitData && zip -r ../../artifacts/lambdas/submitData-$VERSION.zip . && cd -
       - cd lambda/dlqProcessor && zip -r ../../artifacts/lambdas/dlqProcessor-$VERSION.zip . && cd -
