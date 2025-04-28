@@ -96,6 +96,7 @@ Resources:
                   - iam:AttachRolePolicy
                   - iam:PassRole
                   - iam:PutRolePolicy
+                  - iam:DetachRolePolicy
                   # CodeBuild specific permissions
                   - codebuild:CreateProject
                   - codebuild:DeleteProject
