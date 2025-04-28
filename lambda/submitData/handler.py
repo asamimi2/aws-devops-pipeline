@@ -2,69 +2,46 @@ import json
 import boto3
 import os
 import base64
-from io import BytesIO
 
-# Initialize SQS and S3 clients
-sqs = boto3.client('sqs')
 s3 = boto3.client('s3')
+sqs = boto3.client('sqs')
 
 QUEUE_URL = os.environ.get('QUEUE_URL')
 BUCKET_NAME = os.environ.get('BUCKET_NAME')
-API_ENDPOINT = os.environ.get('API_ENDPOINT')  # API Gateway endpoint
 
 def lambda_handler(event, context):
     try:
-        # Parse the event body (assuming base64-encoded image data)
-        body = json.loads(event['body']) if 'body' in event else event
+        print("Received event:", event)
         
-        file_name = body.get('file_name')
-        file_data_base64 = body.get('file_data')
+        body = event.get('body')
+        if event.get('isBase64Encoded'):
+            body = base64.b64decode(body)
         
-        if not file_name or not file_data_base64:
-            raise ValueError("File name or file data missing in the request.")
-
-        # Decode the base64-encoded file
-        file_data = base64.b64decode(file_data_base64)
-        file_stream = BytesIO(file_data)
-
+        file_key = "uploads/uploaded_file"
+        
         # Upload the file to S3
-        s3.put_object(
-            Bucket=BUCKET_NAME,
-            Key=f"uploads/{file_name}",
-            Body=file_stream,
-            ContentType="application/octet-stream"
-        )
+        s3.put_object(Bucket=BUCKET_NAME, Key=file_key, Body=body)
+        
+        # Send a message to SQS
+        sqs.send_message(QueueUrl=QUEUE_URL, MessageBody=json.dumps({"fileKey": file_key}))
 
-        # Send message to SQS
-        message = json.dumps({
-            'file_name': file_name,
-            's3_bucket': BUCKET_NAME,
-            's3_key': f"uploads/{file_name}",
-            'message': 'File uploaded successfully'
-        })
-        sqs.send_message(QueueUrl=QUEUE_URL, MessageBody=message)
-
-        # Return the API endpoint
         return {
             "statusCode": 200,
             "headers": {
-                "Access-Control-Allow-Origin": "*",  # Allow all origins
-                "Access-Control-Allow-Methods": "OPTIONS,POST,GET",  # Allowed methods
-                "Access-Control-Allow-Headers": "Content-Type,Authorization"  # Allowed headers
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "POST, OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type, Authorization",
             },
-            "body": json.dumps({
-                "message": "File uploaded successfully!",
-                "api_endpoint": API_ENDPOINT  # Send the API endpoint back
-            })
+            "body": json.dumps({"message": "Upload successful"})
         }
-
     except Exception as e:
+        print("Error:", e)
         return {
             "statusCode": 500,
             "headers": {
-                "Access-Control-Allow-Origin": "*",  # Allow all origins
-                "Access-Control-Allow-Methods": "OPTIONS,POST,GET",  # Allowed methods
-                "Access-Control-Allow-Headers": "Content-Type,Authorization"  # Allowed headers
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "POST, OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type, Authorization",
             },
             "body": json.dumps({"error": str(e)})
         }
