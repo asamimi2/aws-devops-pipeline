@@ -30,7 +30,7 @@ Resources:
     Properties:
       Name: CodeBuildProject
       Description: CodeBuild Project for Building the App
-      ServiceRole: !ImportValue CodeBuildServiceRoleArn  # Use the correct role for CodeBuild
+      ServiceRole: !ImportValue CodeBuildServiceRoleArn
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:7.0
@@ -53,11 +53,11 @@ Resources:
         Packaging: ZIP
         Name: build-output
 
-  # CodePipeline Pipeline that orchestrates all stages
+  # CodePipeline Pipeline
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
-      RoleArn: !ImportValue CodePipelineServiceRoleArn  # Correct role for CodePipeline
+      RoleArn: !ImportValue CodePipelineServiceRoleArn
       ArtifactStore:
         Type: S3
         Location: !ImportValue ArtifactBucketName
@@ -77,6 +77,7 @@ Resources:
                 Repo: !Ref GitHubRepo
                 Branch: !Ref GitHubBranch
                 OAuthToken: !Ref GitHubOAuthToken
+
         - Name: Build
           Actions:
             - Name: CodeBuild_Action
@@ -91,6 +92,7 @@ Resources:
                 - Name: BuildOutput
               Configuration:
                 ProjectName: !Ref CodeBuildProject
+
         - Name: DeployStaticWebsite
           Actions:
             - Name: Deploy_Static_Website
@@ -103,13 +105,15 @@ Resources:
                 - Name: BuildOutput
               Configuration:
                 BucketName: !ImportValue StaticSiteBucketName
-                Extract: "true"
+                Extract: true
+                # Deploy ONLY static site files from 'artifacts/static-site/'
+                ObjectKey: artifacts/static-site/
 
 Outputs:
   CodeBuildProjectName:
     Value: !Ref CodeBuildProject
     Description: The CodeBuild project used for the CI/CD pipeline.
-  
+
   PipelineName:
     Value: !Ref Pipeline
     Description: The pipeline for the CI/CD process.
