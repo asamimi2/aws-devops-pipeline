@@ -237,6 +237,7 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: "*"
+
 Outputs:
   LambdaExecutionRoleArn:
     Description: ARN of the Lambda execution role
