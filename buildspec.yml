@@ -11,39 +11,24 @@ phases:
 
   build:
     commands:
-      - echo "Zipping Lambda functions correctly..."
-      - mkdir -p artifacts
+      - echo "Preparing artifacts..."
 
-      - |
-        for dir in lambda/submitData lambda/dlqProcessor lambda/cleanup; do
-          if [ ! -d "$dir" ]; then
-            echo "Directory $dir does not exist"; exit 1;
-          fi
-        done
+      - mkdir -p artifacts/lambdas
+      - mkdir -p artifacts/templates
+      - mkdir -p artifacts/static-site
 
-      - cd lambda/submitData && zip -r ../../artifacts/submitData.zip . && cd -
-      - cd lambda/dlqProcessor && zip -r ../../artifacts/dlqProcessor.zip . && cd -
-      - cd lambda/cleanup && zip -r ../../artifacts/cleanup.zip . && cd -
+      # Zip Lambda functions
+      - cd lambda/submitData && zip -r ../../artifacts/lambdas/submitData.zip . && cd -
+      - cd lambda/dlqProcessor && zip -r ../../artifacts/lambdas/dlqProcessor.zip . && cd -
+      - cd lambda/cleanup && zip -r ../../artifacts/lambdas/cleanup.zip . && cd -
 
-      - echo "Uploading Lambda artifacts to S3..."
-      - aws s3 cp artifacts/ s3://$ARTIFACT_BUCKET/lambda/ --recursive
-      - aws s3 ls s3://$ARTIFACT_BUCKET/lambda/
+      # Copy CloudFormation templates
+      - cp templates/*.yaml artifacts/templates/
 
-      - echo "Uploading Static Website Files (index.html and main.js) to S3..."
-      - aws s3 cp static-website/index.html s3://$STATIC_WEBSITE_BUCKET/index.html
-      - aws s3 cp static-website/main.js s3://$STATIC_WEBSITE_BUCKET/main.js
-      - aws s3 ls s3://$STATIC_WEBSITE_BUCKET/
-
-      - echo "Uploading CloudFormation templates to Artifact Bucket..."
-      - aws s3 cp templates/ s3://$ARTIFACT_BUCKET/templates/ --recursive
-      - aws s3 ls s3://$ARTIFACT_BUCKET/templates/
-
-      - echo "Validating root stack template..."
-      - aws cloudformation validate-template --template-body file://templates/root.yaml
-
-      - echo "Deploying root stack with updated Lambda functions..."
-      - aws cloudformation deploy --template-file templates/root.yaml --stack-name devops-root-stack --capabilities CAPABILITY_NAMED_IAM
+      # Copy static website files
+      - cp static-website/index.html artifacts/static-site/
+      - cp static-website/main.js artifacts/static-site/
 
 artifacts:
   files:
-    - '**/*'
+    - artifacts/**/*  # Package the artifacts folder only

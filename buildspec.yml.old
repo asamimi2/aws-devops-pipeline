@@ -1,0 +1,49 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.12
+    commands:
+      - echo "Setting environment variables..."
+      - export ARTIFACT_BUCKET=$ARTIFACT_BUCKET
+      - export STATIC_WEBSITE_BUCKET=$STATIC_WEBSITE_BUCKET
+
+  build:
+    commands:
+      - echo "Zipping Lambda functions correctly..."
+      - mkdir -p artifacts
+
+      - |
+        for dir in lambda/submitData lambda/dlqProcessor lambda/cleanup; do
+          if [ ! -d "$dir" ]; then
+            echo "Directory $dir does not exist"; exit 1;
+          fi
+        done
+
+      - cd lambda/submitData && zip -r ../../artifacts/submitData.zip . && cd -
+      - cd lambda/dlqProcessor && zip -r ../../artifacts/dlqProcessor.zip . && cd -
+      - cd lambda/cleanup && zip -r ../../artifacts/cleanup.zip . && cd -
+
+      - echo "Uploading Lambda artifacts to S3..."
+      - aws s3 cp artifacts/ s3://$ARTIFACT_BUCKET/lambda/ --recursive
+      - aws s3 ls s3://$ARTIFACT_BUCKET/lambda/
+
+      - echo "Uploading Static Website Files (index.html and main.js) to S3..."
+      - aws s3 cp static-website/index.html s3://$STATIC_WEBSITE_BUCKET/index.html
+      - aws s3 cp static-website/main.js s3://$STATIC_WEBSITE_BUCKET/main.js
+      - aws s3 ls s3://$STATIC_WEBSITE_BUCKET/
+
+      - echo "Uploading CloudFormation templates to Artifact Bucket..."
+      - aws s3 cp templates/ s3://$ARTIFACT_BUCKET/templates/ --recursive
+      - aws s3 ls s3://$ARTIFACT_BUCKET/templates/
+
+      - echo "Validating root stack template..."
+      - aws cloudformation validate-template --template-body file://templates/root.yaml
+
+      - echo "Deploying root stack with updated Lambda functions..."
+      - aws cloudformation deploy --template-file templates/root.yaml --stack-name devops-root-stack --capabilities CAPABILITY_NAMED_IAM
+
+artifacts:
+  files:
+    - '**/*'
