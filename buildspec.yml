@@ -36,6 +36,7 @@ phases:
       - aws s3 cp static-website/index.html s3://$STATIC_WEBSITE_BUCKET/index.html
       - aws s3 cp static-website/main.js s3://$STATIC_WEBSITE_BUCKET/main.js
 
+      # Verify what is in the bucket
       - aws s3 ls s3://$STATIC_WEBSITE_BUCKET/
 
       # Upload CloudFormation templates to Artifact Bucket
