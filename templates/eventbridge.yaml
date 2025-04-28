@@ -9,16 +9,16 @@ Resources:
       Name: devops-event-bus
 
   # (Optional) Scheduled Cleanup Event
-  ScheduledCleanupRule:
-    Type: AWS::Events::Rule
-    Properties:
-      Name: devops-scheduled-cleanup
-      Description: "Scheduled trigger to cleanup old S3 objects nightly"
-      ScheduleExpression: "cron(0 2 * * ? *)"  # every day at 2 AM UTC
-      Targets:
-        - Arn: !ImportValue CleanupFunctionArn
-          Id: "CleanupFunctionTarget"
-      EventBusName: !Ref EventBus
+ScheduledCleanupRule:
+  Type: AWS::Events::Rule
+  Properties:
+    Name: devops-scheduled-cleanup
+    Description: "Scheduled trigger to cleanup old S3 objects nightly"
+    ScheduleExpression: "cron(0 2 * * ? *)"  # every day at 2 AM UTC
+    Targets:
+      - Arn: !ImportValue CleanupFunctionArn
+        Id: "CleanupFunctionTarget"
+
 
 Outputs:
   EventBusArn:
