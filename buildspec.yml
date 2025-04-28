@@ -8,36 +8,47 @@ phases:
       - echo "Setting environment variables..."
       - export ARTIFACT_BUCKET=$ARTIFACT_BUCKET
       - export STATIC_WEBSITE_BUCKET=$STATIC_WEBSITE_BUCKET
+      - export VERSION=$(date +%s)  # Dynamic versioning based on timestamp
+      - echo "Generated build version: $VERSION"
 
   build:
     commands:
-      - echo "Preparing artifacts..."
+      - echo "Preparing artifact folders..."
       - mkdir -p artifacts/lambdas artifacts/templates artifacts/static-site
 
-      # Zip the Lambda functions into the correct artifacts structure
-      - cd lambda/submitData && zip -r ../../artifacts/lambdas/submitData.zip . && cd -
-      - cd lambda/dlqProcessor && zip -r ../../artifacts/lambdas/dlqProcessor.zip . && cd -
-      - cd lambda/cleanup && zip -r ../../artifacts/lambdas/cleanup.zip . && cd -
+      - echo "Zipping Lambda functions with version..."
+      - cd lambda/submitData && zip -r ../../artifacts/lambdas/submitData-$VERSION.zip . && cd -
+      - cd lambda/dlqProcessor && zip -r ../../artifacts/lambdas/dlqProcessor-$VERSION.zip . && cd -
+      - cd lambda/cleanup && zip -r ../../artifacts/lambdas/cleanup-$VERSION.zip . && cd -
 
-      # Copy templates
+      - echo "Copying templates..."
       - cp templates/*.yaml artifacts/templates/
 
-      # Copy static website files
+      - echo "Copying static website files..."
       - cp static-website/index.html artifacts/static-site/
       - cp static-website/main.js artifacts/static-site/
 
-      - echo "Uploading artifacts to S3 bucket..."
+  post_build:
+    commands:
+      - echo "Uploading Lambda artifacts to S3..."
       - aws s3 cp artifacts/lambdas/ s3://$ARTIFACT_BUCKET/lambda/ --recursive
+
+      - echo "Uploading CloudFormation templates to S3..."
       - aws s3 cp artifacts/templates/ s3://$ARTIFACT_BUCKET/templates/ --recursive
+
+      - echo "Uploading static website files to S3..."
       - aws s3 cp artifacts/static-site/index.html s3://$STATIC_WEBSITE_BUCKET/index.html
       - aws s3 cp artifacts/static-site/main.js s3://$STATIC_WEBSITE_BUCKET/main.js
 
-      # Validate and deploy root.yaml
-      - echo "Validating CloudFormation root template..."
+      - echo "Validating CloudFormation root.yaml..."
       - aws cloudformation validate-template --template-body file://artifacts/templates/root.yaml
 
-      - echo "Deploying CloudFormation root stack..."
-      - aws cloudformation deploy --template-file artifacts/templates/root.yaml --stack-name devops-root-stack --capabilities CAPABILITY_NAMED_IAM
+      - echo "Deploying root CloudFormation stack..."
+      - aws cloudformation deploy \
+          --template-file artifacts/templates/root.yaml \
+          --stack-name devops-root-stack \
+          --capabilities CAPABILITY_NAMED_IAM \
+          --parameter-overrides Version=$VERSION
 
 artifacts:
   files:
