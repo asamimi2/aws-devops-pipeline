@@ -49,6 +49,7 @@ Resources:
     DependsOn: 
       - SQSStack
       - LambdaStack
+      - IAMStack
     Properties:
       TemplateURL: !Join
         - ""
