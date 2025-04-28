@@ -98,7 +98,7 @@ Resources:
       Role: !ImportValue LambdaExecutionRoleArn
       Code:
         S3Bucket: !ImportValue ArtifactBucketName
-        S3Key: lambda/submitData-${Version}.zip
+        S3Key: !Sub lambda/submitData-${Version}.zip
       Timeout: 10
       Environment:
         Variables:
@@ -125,7 +125,7 @@ Resources:
       Role: !ImportValue LambdaExecutionRoleArn
       Code:
         S3Bucket: !ImportValue ArtifactBucketName
-        S3Key: lambda/cleanup-${Version}.zip
+        S3Key: !Sub lambda/cleanup-${Version}.zip
       Timeout: 10
       Environment:
         Variables:
