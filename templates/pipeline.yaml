@@ -106,8 +106,6 @@ Resources:
               Configuration:
                 BucketName: !ImportValue StaticSiteBucketName
                 Extract: true
-                # Deploy ONLY static site files from 'artifacts/static-site/'
-                ObjectKey: artifacts/static-site/
 
 Outputs:
   CodeBuildProjectName:
