@@ -103,6 +103,7 @@ Resources:
 
   SubmitDataFunctionPermission:
     Type: AWS::Lambda::Permission
+    DependsOn: SubmitDataFunction
     Properties:
       FunctionName: !GetAtt SubmitDataFunction.Arn
       Action: lambda:InvokeFunction
