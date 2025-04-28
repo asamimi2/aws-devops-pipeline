@@ -5,16 +5,15 @@ phases:
     runtime-versions:
       python: 3.12
     commands:
-      - echo "Setting environment variable ARTIFACT_BUCKET..."
-      - export ARTIFACT_BUCKET=$ARTIFACT_BUCKET  # Ensure ARTIFACT_BUCKET is set
-      - export STATIC_WEBSITE_BUCKET=$STATIC_WEBSITE_BUCKET  # Ensure STATIC_WEBSITE_BUCKET is set
+      - echo "Setting environment variables..."
+      - export ARTIFACT_BUCKET=$ARTIFACT_BUCKET
+      - export STATIC_WEBSITE_BUCKET=$STATIC_WEBSITE_BUCKET
 
   build:
     commands:
-      - echo "Zipping Lambda functions..."
+      - echo "Zipping Lambda functions correctly..."
       - mkdir -p artifacts
 
-      # Check if required directories exist
       - |
         for dir in lambda/submitData lambda/dlqProcessor lambda/cleanup; do
           if [ ! -d "$dir" ]; then
@@ -22,25 +21,20 @@ phases:
           fi
         done
 
-      # Zip the Lambda functions
-      - zip -r artifacts/submitData.zip lambda/submitData
-      - zip -r artifacts/dlqProcessor.zip lambda/dlqProcessor
-      - zip -r artifacts/cleanup.zip lambda/cleanup
+      - cd lambda/submitData && zip -r ../../artifacts/submitData.zip . && cd -
+      - cd lambda/dlqProcessor && zip -r ../../artifacts/dlqProcessor.zip . && cd -
+      - cd lambda/cleanup && zip -r ../../artifacts/cleanup.zip . && cd -
 
       - echo "Uploading Lambda artifacts to S3..."
       - aws s3 cp artifacts/ s3://$ARTIFACT_BUCKET/lambda/ --recursive
       - aws s3 ls s3://$ARTIFACT_BUCKET/lambda/
 
-      # Upload only index.html and main.js from static-website
       - echo "Uploading Static Website Files (index.html and main.js) to S3..."
       - aws s3 cp static-website/index.html s3://$STATIC_WEBSITE_BUCKET/index.html
       - aws s3 cp static-website/main.js s3://$STATIC_WEBSITE_BUCKET/main.js
-
-      # Verify what is in the bucket
       - aws s3 ls s3://$STATIC_WEBSITE_BUCKET/
 
-      # Upload CloudFormation templates to Artifact Bucket
-      - echo "Uploading CloudFormation templates to S3..."
+      - echo "Uploading CloudFormation templates to Artifact Bucket..."
       - aws s3 cp templates/ s3://$ARTIFACT_BUCKET/templates/ --recursive
       - aws s3 ls s3://$ARTIFACT_BUCKET/templates/
 
