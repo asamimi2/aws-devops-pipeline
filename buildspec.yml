@@ -6,58 +6,39 @@ phases:
       python: 3.12
     commands:
       - echo "Setting environment variables..."
-      - "export ARTIFACT_BUCKET=$ARTIFACT_BUCKET"
-      - "export STATIC_WEBSITE_BUCKET=$STATIC_WEBSITE_BUCKET"
-      - "export VERSION=$(date +%s)"
+      - export ARTIFACT_BUCKET=$ARTIFACT_BUCKET
+      - export STATIC_WEBSITE_BUCKET=$STATIC_WEBSITE_BUCKET
+      - export VERSION=$(date +%s)
       - echo "Generated build version: $VERSION"
-
 
   build:
     commands:
-      - echo "Preparing artifact folders..."
+      - echo "Preparing artifacts with version $VERSION..."
       - mkdir -p artifacts/lambdas artifacts/templates artifacts/static-site
 
-      - echo "Zipping Lambda functions with version..."
-      - cd lambda/submitData
-      - zip -r ../../artifacts/lambdas/submitData-$VERSION.zip .
-      - cd -
+      # Zip Lambda functions with VERSION in filename
+      - cd lambda/submitData && zip -r ../../artifacts/lambdas/submitData-$VERSION.zip . && cd -
+      - cd lambda/dlqProcessor && zip -r ../../artifacts/lambdas/dlqProcessor-$VERSION.zip . && cd -
+      - cd lambda/cleanup && zip -r ../../artifacts/lambdas/cleanup-$VERSION.zip . && cd -
 
-      - cd lambda/dlqProcessor
-      - zip -r ../../artifacts/lambdas/dlqProcessor-$VERSION.zip .
-      - cd -
-
-      - cd lambda/cleanup
-      - zip -r ../../artifacts/lambdas/cleanup-$VERSION.zip .
-      - cd -
-
-      - echo "Copying templates..."
+      # Copy templates
       - cp templates/*.yaml artifacts/templates/
 
-      - echo "Copying static website files..."
+      # Copy static website files
       - cp static-website/index.html artifacts/static-site/
       - cp static-website/main.js artifacts/static-site/
 
-  post_build:
-    commands:
-      - echo "Uploading Lambda artifacts to S3..."
+      - echo "Uploading artifacts to S3 bucket..."
       - aws s3 cp artifacts/lambdas/ s3://$ARTIFACT_BUCKET/lambda/ --recursive
-
-      - echo "Uploading CloudFormation templates to S3..."
       - aws s3 cp artifacts/templates/ s3://$ARTIFACT_BUCKET/templates/ --recursive
-
-      - echo "Uploading static website files to S3..."
       - aws s3 cp artifacts/static-site/index.html s3://$STATIC_WEBSITE_BUCKET/index.html
       - aws s3 cp artifacts/static-site/main.js s3://$STATIC_WEBSITE_BUCKET/main.js
 
-      - echo "Validating CloudFormation root.yaml..."
+      - echo "Validating CloudFormation root template..."
       - aws cloudformation validate-template --template-body file://artifacts/templates/root.yaml
 
       - echo "Deploying CloudFormation root stack..."
-      - aws cloudformation deploy \
-          --template-file artifacts/templates/root.yaml \
-          --stack-name devops-root-stack \
-          --capabilities CAPABILITY_NAMED_IAM \
-          --parameter-overrides Version=$VERSION
+      - aws cloudformation deploy --template-file artifacts/templates/root.yaml --stack-name devops-root-stack --capabilities CAPABILITY_NAMED_IAM --parameter-overrides Version=$VERSION
 
 artifacts:
   files:

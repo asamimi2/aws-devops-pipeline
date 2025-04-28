@@ -1,6 +1,11 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Root stack to orchestrate all sub-stacks and create required S3 buckets
 
+Parameters:
+  Version:
+    Type: String
+    Default: "latest"
+
 Resources:
   # IAM Stack Reference
   IAMStack:
@@ -42,6 +47,8 @@ Resources:
           - ".s3."
           - !Ref "AWS::Region"
           - ".amazonaws.com/templates/lambda.yaml"
+      Parameters:
+        Version: !Ref Version
 
   # EventBridge Stack
   EventBridgeStack:
@@ -58,6 +65,8 @@ Resources:
           - ".s3."
           - !Ref "AWS::Region"
           - ".amazonaws.com/templates/eventbridge.yaml"
+      Parameters:
+        Version: !Ref Version
 
   # Monitoring Stack
   MonitoringStack:

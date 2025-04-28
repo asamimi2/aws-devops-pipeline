@@ -1,6 +1,11 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: SQS Stack to create a Simple Queue Service (SQS) Queue with DLQ Processing
 
+Parameters:
+  Version:
+    Type: String
+    Default: "latest"
+
 Resources:
   # DLQ Processor Lambda Function
   DLQProcessorFunction:
@@ -12,7 +17,7 @@ Resources:
       Role: !ImportValue LambdaExecutionRoleArn  # Import existing execution role
       Code:
         S3Bucket: !ImportValue ArtifactBucketName
-        S3Key: lambda/dlqProcessor.zip
+        S3Key: lambda/dlqProcessor-${Version}.zip
       Timeout: 10
 
   # Main Queue (with RedrivePolicy to send failed messages to DLQ)
