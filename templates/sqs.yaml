@@ -38,6 +38,9 @@ Resources:
   # Event Source Mapping: DLQ triggers DLQProcessorFunction
   DLQEventSourceMapping:
     Type: AWS::Lambda::EventSourceMapping
+    DependsOn:
+      - DLQProcessorFunction
+      - MyDeadLetterQueue
     Properties:
       BatchSize: 10
       Enabled: true
