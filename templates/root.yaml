@@ -32,7 +32,9 @@ Resources:
           - ".s3."
           - !Ref "AWS::Region"
           - ".amazonaws.com/templates/sqs.yaml"
-
+      Parameters:
+        Version: !Ref Version
+        
   # Lambda Stack
   LambdaStack:
     Type: AWS::CloudFormation::Stack
@@ -65,8 +67,6 @@ Resources:
           - ".s3."
           - !Ref "AWS::Region"
           - ".amazonaws.com/templates/eventbridge.yaml"
-      Parameters:
-        Version: !Ref Version
 
   # Monitoring Stack
   MonitoringStack:
