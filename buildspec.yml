@@ -12,23 +12,33 @@ phases:
   build:
     commands:
       - echo "Preparing artifacts..."
+      - mkdir -p artifacts/lambdas artifacts/templates artifacts/static-site
 
-      - mkdir -p artifacts/lambdas
-      - mkdir -p artifacts/templates
-      - mkdir -p artifacts/static-site
-
-      # Zip Lambda functions
+      # Zip the Lambda functions into the correct artifacts structure
       - cd lambda/submitData && zip -r ../../artifacts/lambdas/submitData.zip . && cd -
       - cd lambda/dlqProcessor && zip -r ../../artifacts/lambdas/dlqProcessor.zip . && cd -
       - cd lambda/cleanup && zip -r ../../artifacts/lambdas/cleanup.zip . && cd -
 
-      # Copy CloudFormation templates
+      # Copy templates
       - cp templates/*.yaml artifacts/templates/
 
       # Copy static website files
       - cp static-website/index.html artifacts/static-site/
       - cp static-website/main.js artifacts/static-site/
 
+      - echo "Uploading artifacts to S3 bucket..."
+      - aws s3 cp artifacts/lambdas/ s3://$ARTIFACT_BUCKET/lambda/ --recursive
+      - aws s3 cp artifacts/templates/ s3://$ARTIFACT_BUCKET/templates/ --recursive
+      - aws s3 cp artifacts/static-site/index.html s3://$STATIC_WEBSITE_BUCKET/index.html
+      - aws s3 cp artifacts/static-site/main.js s3://$STATIC_WEBSITE_BUCKET/main.js
+
+      # Validate and deploy root.yaml
+      - echo "Validating CloudFormation root template..."
+      - aws cloudformation validate-template --template-body file://artifacts/templates/root.yaml
+
+      - echo "Deploying CloudFormation root stack..."
+      - aws cloudformation deploy --template-file artifacts/templates/root.yaml --stack-name devops-root-stack --capabilities CAPABILITY_NAMED_IAM
+
 artifacts:
   files:
-    - artifacts/**/*  # Package the artifacts folder only
+    - '**/*'
