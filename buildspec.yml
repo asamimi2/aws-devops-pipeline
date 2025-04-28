@@ -8,7 +8,7 @@ phases:
       - echo "Setting environment variables..."
       - export ARTIFACT_BUCKET=$ARTIFACT_BUCKET
       - export STATIC_WEBSITE_BUCKET=$STATIC_WEBSITE_BUCKET
-      - export VERSION=$(date +%s)  # Dynamic versioning based on timestamp
+      - export VERSION=$(date +%s)
       - echo "Generated build version: $VERSION"
 
   build:
@@ -17,9 +17,17 @@ phases:
       - mkdir -p artifacts/lambdas artifacts/templates artifacts/static-site
 
       - echo "Zipping Lambda functions with version..."
-      - cd lambda/submitData && zip -r ../../artifacts/lambdas/submitData-$VERSION.zip . && cd -
-      - cd lambda/dlqProcessor && zip -r ../../artifacts/lambdas/dlqProcessor-$VERSION.zip . && cd -
-      - cd lambda/cleanup && zip -r ../../artifacts/lambdas/cleanup-$VERSION.zip . && cd -
+      - cd lambda/submitData
+      - zip -r ../../artifacts/lambdas/submitData-$VERSION.zip .
+      - cd -
+
+      - cd lambda/dlqProcessor
+      - zip -r ../../artifacts/lambdas/dlqProcessor-$VERSION.zip .
+      - cd -
+
+      - cd lambda/cleanup
+      - zip -r ../../artifacts/lambdas/cleanup-$VERSION.zip .
+      - cd -
 
       - echo "Copying templates..."
       - cp templates/*.yaml artifacts/templates/
@@ -43,7 +51,7 @@ phases:
       - echo "Validating CloudFormation root.yaml..."
       - aws cloudformation validate-template --template-body file://artifacts/templates/root.yaml
 
-      - echo "Deploying root CloudFormation stack..."
+      - echo "Deploying CloudFormation root stack..."
       - aws cloudformation deploy \
           --template-file artifacts/templates/root.yaml \
           --stack-name devops-root-stack \
