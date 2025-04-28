@@ -1,44 +1,24 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: EventBridge setup for event-driven architecture
+Description: EventBridge setup for event-driven architecture (fixed and aligned to architecture)
 
 Resources:
-  # EventBus
+  # Custom Event Bus (optional if you want a separate bus, otherwise default bus is fine)
   EventBus:
     Type: AWS::Events::EventBus
     Properties:
-      Name: !Sub "devops-event-bus"
+      Name: devops-event-bus
 
-  ProcessDataLambda:
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName: !Sub "devops-ProcessDataLambda"
-      Handler: index.handler
-      Role: !ImportValue LambdaExecutionRoleArn
-      Code:
-        S3Bucket: !ImportValue ArtifactBucketName
-        S3Key: lambda/submitData.zip
-      Runtime: python3.12
-      Environment:
-        Variables:
-          QUEUE_URL: !ImportValue MyQueueUrl
-          BUCKET_NAME: !ImportValue StaticSiteBucketName
-
-  # EventBridge Rule
-  EventRule:
+  # (Optional) Scheduled Cleanup Event
+  ScheduledCleanupRule:
     Type: AWS::Events::Rule
     Properties:
-      Name: !Sub "devops-event-rule"
-      EventBusName: !Ref EventBus
-      EventPattern:
-        source:
-          - "aws.s3"
-        detail-type:
-          - "AWS API Call via CloudTrail"
-        resources:
-          - !ImportValue StaticSiteBucketName
+      Name: devops-scheduled-cleanup
+      Description: "Scheduled trigger to cleanup old S3 objects nightly"
+      ScheduleExpression: "cron(0 2 * * ? *)"  # every day at 2 AM UTC
       Targets:
-        - Arn: !ImportValue SubmitDataFunctionArn
-          Id: "ProcessDataLambdaTarget"
+        - Arn: !ImportValue CleanupFunctionArn
+          Id: "CleanupFunctionTarget"
+      EventBusName: !Ref EventBus
 
 Outputs:
   EventBusArn:
