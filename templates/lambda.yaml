@@ -101,6 +101,14 @@ Resources:
           BUCKET_NAME: !ImportValue StaticSiteBucketName
           API_ENDPOINT: !Ref APIGatewayRestAPI
 
+  SubmitDataFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt SubmitDataFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${APIGatewayRestAPI}/*/POST/upload
+
   # Cleanup Lambda Function
   CleanupFunction:
     Type: AWS::Lambda::Function
