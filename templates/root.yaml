@@ -17,6 +17,8 @@ Resources:
   # SQS Stack
   SQSStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn: 
+      - IAMStack
     Properties:
       TemplateURL: !Join
         - ""
