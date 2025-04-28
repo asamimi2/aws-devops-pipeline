@@ -129,6 +129,7 @@ Resources:
                   - apigateway:GET
                   - apigateway:DELETE
                   - apigateway:PATCH
+                  - apigateway:UpdateAccount
                   #CloudFront permissions for distribution management
                   - cloudfront:CreateInvalidation
                 Resource: "*"

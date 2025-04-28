@@ -209,10 +209,34 @@ Resources:
                   - apigateway:GET
                   - apigateway:DELETE
                   - apigateway:PATCH
+                  - apigateway:UpdateAccount
                   #CloudFront permissions for distribution management
                   - cloudfront:CreateInvalidation
                 Resource: "*"
-
+ 
+  # API Gateway CloudWatch Logging Role
+  ApiGatewayLoggingRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${StackPrefix}-ApiGatewayLoggingRole"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub "${StackPrefix}-ApiGatewayLoggingPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
 Outputs:
   LambdaExecutionRoleArn:
     Description: ARN of the Lambda execution role
@@ -231,3 +255,9 @@ Outputs:
     Value: !GetAtt CodeBuildServiceRole.Arn
     Export:
       Name: CodeBuildServiceRoleArn
+
+  ApiGatewayLoggingRoleArn:
+    Description: ARN of the API Gateway CloudWatch Logs Role
+    Value: !GetAtt ApiGatewayLoggingRole.Arn
+    Export:
+      Name: ApiGatewayLoggingRoleArn

@@ -76,6 +76,12 @@ Resources:
     Properties:
       RestApiId: !Ref APIGatewayRestAPI
       StageName: prod
+      StageDescription:
+        MethodSettings:
+          - DataTraceEnabled: true
+            LoggingLevel: INFO
+            HttpMethod: "*"
+            ResourcePath: "/*"
 
   # Submit Data Lambda Function
   SubmitDataFunction:
@@ -84,7 +90,7 @@ Resources:
       FunctionName: SubmitDataFunction
       Runtime: python3.12
       Handler: handler.lambda_handler
-      Role: !ImportValue LambdaExecutionRoleArn  # Use imported Lambda execution role
+      Role: !ImportValue LambdaExecutionRoleArn
       Code:
         S3Bucket: !ImportValue ArtifactBucketName
         S3Key: lambda/submitData.zip
@@ -92,7 +98,7 @@ Resources:
       Environment:
         Variables:
           QUEUE_URL: !ImportValue MyQueueUrl
-          BUCKET_NAME: !ImportValue StaticSiteBucketName  # Import the StaticSiteBucketName from the root stack
+          BUCKET_NAME: !ImportValue StaticSiteBucketName
           API_ENDPOINT: !Ref APIGatewayRestAPI
 
   # Cleanup Lambda Function
@@ -102,14 +108,20 @@ Resources:
       FunctionName: CleanupFunction
       Runtime: python3.12
       Handler: handler.lambda_handler
-      Role: !ImportValue LambdaExecutionRoleArn  # Use imported Lambda execution role
+      Role: !ImportValue LambdaExecutionRoleArn
       Code:
         S3Bucket: !ImportValue ArtifactBucketName
         S3Key: lambda/cleanup.zip
       Timeout: 10
       Environment:
         Variables:
-          BUCKET_NAME: !ImportValue StaticSiteBucketName  # Attach StaticSiteBucketName from the root stack
+          BUCKET_NAME: !ImportValue StaticSiteBucketName
+
+  # Attach CloudWatch Logging Role to API Gateway
+  ApiGatewayAccount:
+    Type: AWS::ApiGateway::Account
+    Properties:
+      CloudWatchRoleArn: !ImportValue ApiGatewayLoggingRoleArn
 
 Outputs:
   APIEndpoint:
