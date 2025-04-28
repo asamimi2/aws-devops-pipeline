@@ -117,6 +117,7 @@ Resources:
                   - lambda:UpdateFunctionCode
                   - lambda:DeleteFunction
                   - lambda:GetFunction
+                  - lambda:CreateEventSourceMapping
                   # SQS permissions to create and manage queues
                   - sqs:CreateQueue
                   - sqs:DeleteQueue
