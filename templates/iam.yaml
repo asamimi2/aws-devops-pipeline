@@ -215,19 +215,19 @@ Resources:
                 Resource: "*"
  
 # API Gateway CloudWatch Logging Role
-ApiGatewayLoggingRole:
-  Type: AWS::IAM::Role
-  Properties:
-    RoleName: !Sub "${StackPrefix}-ApiGatewayLoggingRole"
-    AssumeRolePolicyDocument:
-      Version: "2012-10-17"
-      Statement:
-        - Effect: Allow
-          Principal:
-            Service: apigateway.amazonaws.com
-          Action: sts:AssumeRole
-    ManagedPolicyArns:
-      - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+  ApiGatewayLoggingRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${StackPrefix}-ApiGatewayLoggingRole"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
 
 Outputs:
   LambdaExecutionRoleArn:
