@@ -8,7 +8,7 @@ phases:
       - echo "Setting environment variables..."
       - export ARTIFACT_BUCKET=$ARTIFACT_BUCKET
       - export STATIC_WEBSITE_BUCKET=$STATIC_WEBSITE_BUCKET
-      - export VERSION=$(date +%s)
+      - "export VERSION=$(date +%s)"
       - echo "Generated build version: $VERSION"
 
   build:
