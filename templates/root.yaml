@@ -67,6 +67,8 @@ Resources:
           - ".s3."
           - !Ref "AWS::Region"
           - ".amazonaws.com/templates/eventbridge.yaml"
+      Parameters:
+        StaticSiteBucketName: !ImportValue StaticSiteBucketName
 
   # Monitoring Stack
   MonitoringStack:
