@@ -5,7 +5,7 @@ import os
 # Initialize the S3 client
 s3 = boto3.client('s3')
 
-MAX_AGE_DAYS = 7
+MAX_AGE_DAYS = 0
 UPLOADS_PREFIX = 'uploads/'  # Only clean files inside uploads/
 
 def lambda_handler(event, context):
