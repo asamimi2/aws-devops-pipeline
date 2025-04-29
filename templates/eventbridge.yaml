@@ -1,6 +1,11 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: EventBridge setup for event-driven architecture (fixed and aligned to architecture)
 
+Parameters:
+  StaticSiteBucketName:
+    Type: String
+    Description: Name of the static site S3 bucket (to pass to CleanupFunction)
+
 Resources:
   # Custom Event Bus (optional if you want a separate bus, otherwise default bus is fine)
   EventBus:
@@ -8,7 +13,7 @@ Resources:
     Properties:
       Name: devops-event-bus
 
-  # (Optional) Scheduled Cleanup Event
+  # Scheduled Cleanup Event
   ScheduledCleanupRule:
     Type: AWS::Events::Rule
     Properties:
@@ -18,6 +23,19 @@ Resources:
       Targets:
         - Arn: !ImportValue CleanupFunctionArn
           Id: "CleanupFunctionTarget"
+          Input: !Sub |
+            {
+              "bucket": "${StaticSiteBucketName}"
+            }
+
+  # Allow EventBridge to invoke CleanupFunction
+  CleanupInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !ImportValue CleanupFunctionArn
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt ScheduledCleanupRule.Arn
 
 Outputs:
   EventBusArn:
