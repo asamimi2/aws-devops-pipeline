@@ -11,8 +11,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            flex-direction: column;
+            min-height: 100vh;
             margin: 0;
+            padding: 20px;
         }
         .container {
             text-align: center;
@@ -22,6 +24,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             width: 90%;
             max-width: 600px;
+            margin-bottom: 30px;
         }
         h1 {
             color: #333;
@@ -41,15 +44,24 @@
         .btn:hover {
             background-color: #0056b3;
         }
+        #previewContainer img {
+            max-width: 90%;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
+
     <div class="container">
         <h1>Welcome to My AWS Static Site!</h1>
         <input type="file" id="fileInput">
         <br>
-        <button class="btn" onclick="uploadFile()">Upload</button>
+        <button class="btn" id="uploadButton">Upload</button>
     </div>
+
+    <div id="previewContainer"></div>
 
     <script src="main.js"></script> <!-- Include the updated main.js file for JavaScript logic -->
 </body>
