@@ -93,19 +93,19 @@ Resources:
               Configuration:
                 ProjectName: !Ref CodeBuildProject
 
-        - Name: DeployStaticWebsite
-          Actions:
-            - Name: Deploy_Static_Website
-              ActionTypeId:
-                Category: Deploy
-                Owner: AWS
-                Provider: S3
-                Version: "1"
-              InputArtifacts:
-                - Name: BuildOutput
-              Configuration:
-                BucketName: !ImportValue StaticSiteBucketName
-                Extract: true
+        # - Name: DeployStaticWebsite
+        #   Actions:
+        #     - Name: Deploy_Static_Website
+        #       ActionTypeId:
+        #         Category: Deploy
+        #         Owner: AWS
+        #         Provider: S3
+        #         Version: "1"
+        #       InputArtifacts:
+        #         - Name: BuildOutput
+        #       Configuration:
+        #         BucketName: !ImportValue StaticSiteBucketName
+        #         Extract: true
 
 Outputs:
   CodeBuildProjectName:
