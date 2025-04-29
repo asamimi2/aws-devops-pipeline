@@ -1,5 +1,5 @@
-// Use the actual API endpoint from API Gateway
 const apiEndpoint = 'https://0hzixmoa24.execute-api.us-east-2.amazonaws.com/prod/upload'; // API Gateway endpoint
+const staticSiteURL = 'http://devops-root-stack-frontend.s3-website.us-east-2.amazonaws.com'; // <-- Your S3 static website hosting URL
 
 // Function to handle file upload to Lambda via API Gateway
 function uploadFileToLambda(fileData, fileName) {
@@ -10,25 +10,31 @@ function uploadFileToLambda(fileData, fileName) {
         },
         body: JSON.stringify({
             file_name: fileName,
-            file_data: fileData // base64-encoded data
+            file_data: fileData
         })
     })
     .then(response => {
-        // Check if the response status is OK (200-299)
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
         return response.json();
     })
     .then(data => {
-        console.log("Lambda Response:", data); // Handle the Lambda response here
-        if (data.api_endpoint) {
-            console.log("API Endpoint:", data.api_endpoint);
-        }
+        console.log("Lambda Response:", data);
         alert("File uploaded successfully!");
+
+        // 🎯 NEW: Dynamically display the uploaded image
+        const uploadedImageUrl = `${staticSiteURL}/uploads/${fileName}`;
+
+        const img = document.createElement('img');
+        img.src = uploadedImageUrl;
+        img.alt = fileName;
+        img.style.maxWidth = "500px";
+        img.style.marginTop = "20px";
+
+        document.body.appendChild(img); // Or insert into a specific div if you want
     })
     .catch(error => {
-        // Handle CORS errors or other fetch-related issues
         if (error.message.includes('Failed to fetch')) {
             console.error('CORS error or network issue:', error);
             alert('CORS error or network issue. Please check your API Gateway configuration.');
@@ -39,7 +45,6 @@ function uploadFileToLambda(fileData, fileName) {
     });
 }
 
-// Function to handle the file selection and encoding as base64
 function handleFileUpload(event) {
     const file = event.target.files[0];
     if (!file) {
@@ -47,19 +52,16 @@ function handleFileUpload(event) {
         return;
     }
 
-    // Read the file and encode it as base64
     const reader = new FileReader();
     reader.onloadend = () => {
-        const base64FileData = reader.result.split(',')[1]; // Get base64-encoded data
+        const base64FileData = reader.result.split(',')[1];
         uploadFileToLambda(base64FileData, file.name);
     };
     reader.readAsDataURL(file);
 }
 
-// Attach event listener to the file input element
 document.getElementById('fileInput').addEventListener('change', handleFileUpload);
 
-// Upload button click handler (to trigger the file upload)
 function uploadFile() {
     const fileInput = document.getElementById('fileInput');
     if (fileInput.files.length === 0) {
