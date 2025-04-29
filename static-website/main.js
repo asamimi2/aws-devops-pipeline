@@ -1,4 +1,4 @@
-const apiEndpoint = 'https://4pdns5k33h.execute-api.us-east-2.amazonaws.com/prod/upload'; // Your API endpoint
+const apiEndpoint = 'https://mla9mq6t15.execute-api.us-east-2.amazonaws.com/prod/upload'; // Your API endpoint
 const staticSiteURL = 'http://devops-root-stack-frontend.s3-website.us-east-2.amazonaws.com'; // Your static site URL
 
 // Handle file upload and display
